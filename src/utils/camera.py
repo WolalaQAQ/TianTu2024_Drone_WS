@@ -1,3 +1,6 @@
+
+# -*- coding: utf-8 -*-
+
 import cv2
 import os
 from datetime import datetime
@@ -22,10 +25,10 @@ def main():
     # 创建保存照片的目录
     create_directory(save_directory)
 
-    # cap = cv2.VideoCapture(rtsp_url)
+    cap = cv2.VideoCapture(rtsp_url)
 
     # 从本地视频文件读取
-    cap = cv2.VideoCapture("/home/xty/sentry_blue.avi")
+   # cap = cv2.VideoCapture("/home/xty/sentry_blue.avi")
 
     if not cap.isOpened():
         print("Error opening video stream or file")
@@ -42,12 +45,12 @@ def main():
         # cv2.imshow('Frame', frame)
 
         # 检测键盘输入
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord('s'):  # 按下 's' 键保存照片
+        user_input = raw_input("Press 's' to save the frame, 'q' to quit: ").strip().lower()
+        if user_input == 's':  # 输入 's' 保存照片
             save_frame(frame, photo_count, save_directory)
             photo_count += 1
-        elif key == ord('q'):  # 按下 'q' 键退出
-            break
+        elif user_input == 'q':  # 输入 'q' 退出
+            breakk
 
     cap.release()
     cv2.destroyAllWindows()
