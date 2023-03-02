@@ -53,7 +53,9 @@ int main(int argc, char** argv) {
 
     std::string rtsp_url;
     nh.param<std::string>("rtsp_url", rtsp_url, "rtsp://127.0.0.1:8554/live");
-     cv::VideoCapture cap(rtsp_url);
+    // std::string gst_pipeline = "rtspsrc location=" + rtsp_url + " ! decodebin ! videoconvert ! appsink";
+    cv::VideoCapture cap(rtsp_url);
+    // cv::VideoCapture cap(gst_pipeline, cv::CAP_GSTREAMER);
 
     // 从文件中读取视频
 //    cv::VideoCapture cap("/home/xty/sentry_blue.avi");
@@ -74,7 +76,22 @@ int main(int argc, char** argv) {
             break;
         }
 
-        img_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", frame).toImageMsg();
+        // 检查图像格式和通道数
+        ROS_INFO("Image depth: %d, Channels: %d", frame.depth(), frame.channels());
+
+        // 确保图像格式为BGR8
+        if (frame.type() != CV_8UC3) {
+            ROS_ERROR("Unexpected image format: %d", frame.type());
+            continue;
+        }
+
+        std_msgs::Header header;
+        header.stamp = ros::Time::now();
+        header.frame_id = "camera";
+
+        // cv::resize(frame, frame, cv::Size(640, 480));
+
+        img_msg = cv_bridge::CvImage(header, "bgr8", frame).toImageMsg();
         image_pub.publish(img_msg);
 
         publishCameraInfo(camera_info_pub, frame, nh);

@@ -42,7 +42,7 @@ void UavDecision::work(){
     ros::Rate loop_rate(5); // 10Hz
 
     while(ros::ok()){
-        if(start_processing){
+        if (start_processing) {
             if(current_state_ == 0){
                 Takeoffmode();
             }
@@ -71,7 +71,7 @@ void UavDecision::Detectmode(){
     // 检测aruco时间戳，如果太远也return
     double current_time = ros::Time::now().toSec();
     double aruco_time = aruco_point_.header.stamp.toSec();
-    if(current_time - aruco_time > 3){
+    if(current_time - aruco_time > 10){
         ROS_INFO("Aruco too old");
         return;
     }
@@ -229,7 +229,7 @@ void UavDecision::arucoposeCallback(const geometry_msgs::PointStamped::ConstPtr&
 void UavDecision::aruco_pid_tracker(double &speedx, double &speedy){
     double errx = img_width_/2 - aruco_point_.point.x;
     double erry = img_height_/2 - aruco_point_.point.y;
-    speedx = - Kp_ * errx;
-    speedy = - Kp_ * erry;
+    speedx = Kp_ * errx;
+    speedy = Kp_ * erry;
 
 }

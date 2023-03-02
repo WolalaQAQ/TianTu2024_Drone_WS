@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
   <!-- Aruco Node -->
-  <node pkg="many_rect_detector" type="many_rect_detector_node" name="many_rect_detector_node" output="screen">
-    <param name="use_rtsp" type="bool" value="0"/>
+  <node pkg="many_rect_detector" type="many_rect_detector_node" name="many_rect_detector" output="screen"> 
+    <param name="use_rtsp" type="bool" value="1"/>
     <param name="rtsp_url" value="rtsp://127.0.0.1:8554/live"/>
   </node>
 

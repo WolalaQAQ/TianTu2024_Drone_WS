@@ -5,9 +5,18 @@
 #include <opencv2/opencv.hpp>
 #include "many_rect_detector/many_rect_detector.h"
 #include <geometry_msgs/PointStamped.h>
+#include <stdio.h>
+#include <iostream>
+#include <chrono>
+#include <thread>
+#include <DjiRtspImageSource.h>
 
 bool use_rtsp = false;
 std::string rtsp_url;
+
+static inline int64_t now() {
+	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "many_rect_detector_node");
@@ -18,48 +27,54 @@ int main(int argc, char** argv) {
 	nh.getParam("/many_rect_detector/use_rtsp", use_rtsp);
 	nh.getParam("/many_rect_detector/rtsp_url", rtsp_url);
 
-	cv::VideoCapture cap;
+	ROS_INFO("RTSP URL: %s", rtsp_url.c_str());
 
-	if (use_rtsp) {
-		cap.open(rtsp_url);
-	} else {
-		cap.open(0);
-	}
-
-    if (!cap.isOpened()) {
-        ROS_ERROR("open failed!");
-        return -1;
-    }
-
-    cv::Mat frame;
-    while (ros::ok()) {
-        cap >> frame;
-        if (frame.empty()) {
-            ROS_ERROR("frame is empty!");
-            break;
-        }
-
-		cv::imshow("frame", frame);
-        Center center = ManyRectDetector::detect(frame);
-		cv::imshow("result", frame);
-		cv::waitKey(1);
-
-		if (center.if_find) {
-			ROS_INFO("center: (%f, %f)", center.x, center.y);
-			geometry_msgs::PointStamped msg;
-			msg.header.stamp = ros::Time::now();
-			msg.header.frame_id = "camera";
-			msg.point.x = center.x;
-			msg.point.y = center.y;
-			msg.point.z = 0;
-			pub.publish(msg);
-		}
-		else {
-			ROS_INFO("not find");
+	DjiRtspImageSource service(rtsp_url);
+	int64_t last_time = now();
+	service.setImageCallback(nullptr, [&](void* handler, uint8_t* frmdata, int frmsize, int width, int height, int pixfmt) -> void {
+		ROS_INFO("Image %d@%p  --  %dx%d -- %d\n", frmsize, frmdata, width, height, pixfmt);
+		
+		if (!frmdata) {
+			ROS_ERROR("No frame data!");
+			return;
 		}
 
+		int64_t now_time = now();
 
-    }
+		if (now_time - last_time > 100) {
+			last_time = now_time;	
 
+			uint8_t* rgbData = new uint8_t[width * height * 3];
+			int result = DjiRtspImageSource::FrameDataToRGB(frmdata, frmsize, width, height, pixfmt, rgbData);
+
+			auto image = cv::Mat(height, width, CV_8UC3, rgbData);
+			cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
+
+			Center center = ManyRectDetector::detect(image);
+
+			if (center.if_find) {
+				ROS_INFO("center: (%f, %f)", center.x, center.y);
+				geometry_msgs::PointStamped msg;
+				msg.header.stamp = ros::Time::now();
+				msg.header.frame_id = "camera";
+				msg.point.x = center.x;
+				msg.point.y = center.y;
+				msg.point.z = 0;
+				pub.publish(msg);
+			} else {
+				ROS_INFO("not find");
+			}
+
+			char name[64];
+			static int counter = 0;
+			sprintf(name, "/root/TianTu2024_Drone_WS/images/%dx%d-%d_%d.jpg", width, height, pixfmt, ++counter);
+			cv::imwrite(name, image);
+			
+			delete[] rgbData;
+		}
+	});
+	service.start();
     ros::spin();
+	service.stop();
+	return 0;
 }

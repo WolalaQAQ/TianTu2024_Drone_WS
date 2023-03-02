@@ -37,6 +37,7 @@ ArucoNode::ArucoNode(ros::NodeHandle &nh) : nh_(nh) {
 }
 
 void ArucoNode::imageCallback(const sensor_msgs::ImageConstPtr &img, const sensor_msgs::CameraInfoConstPtr &cam_info) {
+    // ROS_INFO("Get a frame!!!!!!");
     image_ = img;
     cam_info_ = cam_info;
 
@@ -59,13 +60,14 @@ void ArucoNode::imageCallback(const sensor_msgs::ImageConstPtr &img, const senso
 
     std::vector<int> ids;
     std::vector<std::vector<cv::Point2f>> corners;
-    ROS_INFO("Start to detect!!!!!");
+    // ROS_INFO("Start to detect!!!!!");
     detector_.detect(cv_ptr->image, ids, corners);
 
-    ROS_INFO("Detected %zu markers", ids.size());
     cv::Mat marked_image = cv_ptr->image.clone();
 
     if (!ids.empty()) {
+        ROS_INFO("Detected %zu markers", ids.size());
+
         cv::aruco::drawDetectedMarkers(marked_image, corners, ids);
 
         geometry_msgs::PointStamped center_point_msg;
