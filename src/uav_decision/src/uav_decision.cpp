@@ -94,7 +94,7 @@ void UavDecision::move2Target(){
         flightbyVel.request.fly_time = velocity_.fly_time;
         flightByVelclient_.call(flightbyVel);
         ROS_INFO("Move to target");
-        ros::Duration(velocity_.fly_time+2).sleep();
+        ros::Duration(velocity_.fly_time/1000+2).sleep();
     }
     current_state_ = 2;
 }
