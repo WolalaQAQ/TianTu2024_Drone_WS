@@ -1,188 +1,69 @@
-cmake_minimum_required(VERSION 3.1)
-project(ttauav_node)
+# toplevel CMakeLists.txt for a catkin workspace
+# catkin/cmake/toplevel.cmake
 
+cmake_minimum_required(VERSION 3.0.2)
 
-set(CMAKE_CXX_STANDARD 14) # use C++14
-set(CMAKE_EXE_LINKER_FLAGS "-Wl,--no-as-needed")  # https://github.com/raspberrypi/userland/issues/178
+project(Project)
 
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  compressed_image_transport
-  roscpp
-  std_msgs
-  message_generation
+set(CATKIN_TOPLEVEL TRUE)
+
+# search for catkin within the workspace
+set(_cmd "catkin_find_pkg" "catkin" "${CMAKE_SOURCE_DIR}")
+execute_process(COMMAND ${_cmd}
+  RESULT_VARIABLE _res
+  OUTPUT_VARIABLE _out
+  ERROR_VARIABLE _err
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  ERROR_STRIP_TRAILING_WHITESPACE
 )
+if(NOT _res EQUAL 0 AND NOT _res EQUAL 2)
+  # searching fot catkin resulted in an error
+  string(REPLACE ";" " " _cmd_str "${_cmd}")
+  message(FATAL_ERROR "Search for 'catkin' in workspace failed (${_cmd_str}): ${_err}")
+endif()
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+# include catkin from workspace or via find_package()
+if(_res EQUAL 0)
+  set(catkin_EXTRAS_DIR "${CMAKE_SOURCE_DIR}/${_out}/cmake")
+  # include all.cmake without add_subdirectory to let it operate in same scope
+  include(${catkin_EXTRAS_DIR}/all.cmake NO_POLICY_SCOPE)
+  add_subdirectory("${_out}")
 
-if(${CMAKE_SYSTEM_PROCESSOR} MATCHES arm*) 
+else()
+  # use either CMAKE_PREFIX_PATH explicitly passed to CMake as a command line argument
+  # or CMAKE_PREFIX_PATH from the environment
+  if(NOT DEFINED CMAKE_PREFIX_PATH)
+    if(NOT "$ENV{CMAKE_PREFIX_PATH}" STREQUAL "")
+      if(NOT WIN32)
+        string(REPLACE ":" ";" CMAKE_PREFIX_PATH $ENV{CMAKE_PREFIX_PATH})
+      else()
+        set(CMAKE_PREFIX_PATH $ENV{CMAKE_PREFIX_PATH})
+      endif()
+    endif()
+  endif()
 
-ENDIF()
+  # list of catkin workspaces
+  set(catkin_search_path "")
+  foreach(path ${CMAKE_PREFIX_PATH})
+    if(EXISTS "${path}/.catkin")
+      list(FIND catkin_search_path ${path} _index)
+      if(_index EQUAL -1)
+        list(APPEND catkin_search_path ${path})
+      endif()
+    endif()
+  endforeach()
 
+  # search for catkin in all workspaces
+  set(CATKIN_TOPLEVEL_FIND_PACKAGE TRUE)
+  find_package(catkin QUIET
+    NO_POLICY_SCOPE
+    PATHS ${catkin_search_path}
+    NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+  unset(CATKIN_TOPLEVEL_FIND_PACKAGE)
 
-## Uncomment this if the package has a setup.py. This macro ensures
-## modules and global scripts declared therein get installed
-## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
+  if(NOT catkin_FOUND)
+    message(FATAL_ERROR "find_package(catkin) failed. catkin was neither found in the workspace nor in the CMAKE_PREFIX_PATH. One reason may be that no ROS setup.sh was sourced before.")
+  endif()
+endif()
 
-#######################################
-## Declare ROS messages and services ##
-#######################################
-
-## Generate messages in the 'msg' folder
-add_message_files(
-  FILES
-  uavdata.msg
-)
-
-## Generate services in the 'srv' folder
-add_service_files(
-  FILES
-  takeoffOrLanding.srv
-  flightByOffset.srv
-  flightByVel.srv
-  gimbalControl.srv
-)
-
-## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-)
-
-#add dynamic reconfigure api
-generate_dynamic_reconfigure_options(
-
-)
-
-
-###################################
-## catkin specific configuration ##
-###################################
-## The catkin_package macro generates cmake config files for your package
-## Declare things to be passed to dependent projects
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
-   INCLUDE_DIRS include
-#  LIBRARIES raspicam
-#  CATKIN_DEPENDS compressed_image_transport roscpp std_msgs
-#  DEPENDS system_lib
-   CATKIN_DEPENDS message_runtime std_msgs roscpp
-)
-
-###########
-## Build ##
-###########
-
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-include_directories(include
-  ${catkin_INCLUDE_DIRS}
-  /opt/vc/include
-  /opt/vc/include/interface/vcos/pthreads
-  /opt/vc/include/interface/vmcs_host/linux
-  src/utils
-  src/proxy_src
-  src/ttalink
-)
-
-add_compile_options(-Wall -Wuseless-cast -Wformat-nonliteral)
-
-aux_source_directory(src/proxy_src PROXY_SRCS)
-add_library(proxy ${PROXY_SRCS})
-
-aux_source_directory(src/utils UTILS_SRCS)
-add_library(utils ${UTILS_SRCS})
-
-## Declare a cpp executable
-add_executable(uavdata src/ttauav_node.cpp src/uavData.cpp src/publish.cpp )
-add_dependencies(uavdata ttauav_node_generate_messages_cpp)
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(uavdata
-  ${catkin_LIBRARIES}
-  ${RPI_LIBRARIES} 
-  utils
-  proxy
-)
-
-## Declare a cpp executable
-# add_executable(uavpos src/uavpos_node.cpp src/uavData.cpp src/publish.cpp)
-# add_dependencies(uavpos ttauav_node_generate_messages_cpp)
-
-# ## Specify libraries to link a library or executable target against
-# target_link_libraries(uavpos
-#   ${catkin_LIBRARIES}
-#   ${RPI_LIBRARIES} 
-#   utils
-#   proxy
-# )
-
-add_executable(listener src/listener.cpp)
-add_dependencies(listener ttauav_node_generate_messages_cpp)
-
-target_link_libraries(listener
-  ${catkin_LIBRARIES}
-  ${RPI_LIBRARIES}
-)
-
-add_executable(service src/service_test.cpp src/uavData.cpp )
-add_dependencies(service ttauav_node_generate_messages_cpp)
-
-target_link_libraries(service
-  ${catkin_LIBRARIES}
-  ${RPI_LIBRARIES} 
-  utils
-  proxy
-)
-
-
-add_executable(service_client src/serviceClient.cpp)
-add_dependencies(service_client ttauav_node_generate_messages_cpp)
-
-target_link_libraries(service_client
-  ${catkin_LIBRARIES}
-  ${RPI_LIBRARIES}
-)
-
-
-#############
-## Install ##
-#############
-
-# all install targets should use catkin DESTINATION variables
-# See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
-
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
-## Mark executables and/or libraries for installation
-install(TARGETS uavdata listener service service_client
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
-## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
-
-# Mark other files for installation (e.g. launch and bag files, etc.)
-install(DIRECTORY
-  launch
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
-
-
+catkin_workspace()
