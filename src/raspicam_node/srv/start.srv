@@ -1,0 +1,4 @@
+# StartProcessing.srv
+bool start
+---
+bool success

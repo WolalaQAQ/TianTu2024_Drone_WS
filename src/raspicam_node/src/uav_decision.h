@@ -13,3 +13,4 @@
 #include "ttauav_node/flightByVel.h"
 #include "ttauav_node/gimbalControl.h"
 #include "ttauav_node/takeoffOrLanding.h"
+#include "std_srvs/Trigger.h" 

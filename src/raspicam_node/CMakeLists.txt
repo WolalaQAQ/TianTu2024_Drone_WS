@@ -45,6 +45,7 @@ add_service_files(
   flightByOffset.srv
   flightByVel.srv
   gimbalControl.srv
+  start.srv
 )
 
 ## Generate added messages and services with any dependencies listed here
@@ -150,6 +151,15 @@ target_link_libraries(service_client
   ${RPI_LIBRARIES}
 )
 
+add_executable(uav_decision src/uav_decision.cpp)
+add_dependencies(uav_decision ${${PROJECT_NAME}_EXPORTED_TARGETS}
+                  ${PROJECT_NAME}_generate_messages_cpp
+                  ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(uav_decision
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
+)
 
 #############
 ## Install ##
