@@ -7,9 +7,9 @@ def create_directory(directory):
         os.makedirs(directory)
 
 def save_frame(frame, photo_count, save_directory):
-    filename = os.path.join(save_directory, f"photo_{photo_count}.jpg")
+    filename = os.path.join(save_directory, "photo_{}.jpg".format(photo_count))
     cv2.imwrite(filename, frame)
-    print(f"Saved {filename}")
+    print("Saved {}".format(filename))
 
 def main():
     # 指定RTSP URL
