@@ -1,8 +1,8 @@
 <launch>
 
     <!-- Start the uavdata server -->
-    <!-- <node pkg="ttauav_node" type="uavdata" name="uavdata" output="screen" />
-    <node pkg="ttauav_node" type="service" name="service" output="screen" /> -->
+    <node pkg="ttauav_node" type="uavdata" name="uavdata" output="screen" />
+    <node pkg="ttauav_node" type="service" name="service" output="screen" />
     <node pkg="ttauav_node" type="uav_decision" name="uav_decision" output="screen" />
   
   
