@@ -53,10 +53,10 @@ int main(int argc, char** argv) {
 
     std::string rtsp_url;
     nh.param<std::string>("rtsp_url", rtsp_url, "rtsp://127.0.0.1:8554/live");
-    // cv::VideoCapture cap(rtsp_url);
+     cv::VideoCapture cap(rtsp_url);
 
     // 从文件中读取视频
-    cv::VideoCapture cap("/home/xty/sentry_blue.avi");
+//    cv::VideoCapture cap("/home/xty/sentry_blue.avi");
 
     if (!cap.isOpened()) {
         ROS_ERROR("Error opening video stream or file");
