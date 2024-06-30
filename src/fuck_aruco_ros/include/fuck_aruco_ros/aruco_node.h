@@ -18,36 +18,42 @@ typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sens
 
 class ArucoNode {
 public:
-  ArucoNode() = delete;
-  explicit ArucoNode(ros::NodeHandle& nh);
+    ArucoNode() = delete;
+
+    explicit ArucoNode(ros::NodeHandle &nh);
 
 private:
-  ros::NodeHandle nh_;
-  std::shared_ptr<image_transport::ImageTransport> it_;
+    ros::NodeHandle nh_;
+    std::shared_ptr<image_transport::ImageTransport> it_;
 
-  std::shared_ptr<message_filters::Synchronizer<MySyncPolicy>> sync_;
+    std::shared_ptr<message_filters::Synchronizer<MySyncPolicy>> sync_;
 
-  std::string image_topic_;
-  message_filters::Subscriber<sensor_msgs::Image> image_sub_;
-  std::string cam_info_topic_;
-  message_filters::Subscriber<sensor_msgs::CameraInfo> cam_info_sub_;
+    std::string image_topic_;
+    message_filters::Subscriber<sensor_msgs::Image> image_sub_;
+    std::string cam_info_topic_;
+    message_filters::Subscriber<sensor_msgs::CameraInfo> cam_info_sub_;
 
-  std::string marked_image_topic_;
-  image_transport::Publisher marked_image_pub_;
+    std::string marked_image_topic_;
+    image_transport::Publisher marked_image_pub_;
 
-  std::string marker_pose_topic_;
-  ros::Publisher marker_pose_pub_;
+    std::string marker_pose_topic_;
+    ros::Publisher marker_pose_pub_;
 
-  std::string camera_frame_;
+    std::string marker_point_topic_;
+    ros::Publisher marker_point_pub_;
 
-  sensor_msgs::ImageConstPtr image_;
-  sensor_msgs::CameraInfoConstPtr cam_info_;
+    std::string camera_frame_;
 
-  ArucoDetector detector_;
+    sensor_msgs::ImageConstPtr image_;
+    sensor_msgs::CameraInfoConstPtr cam_info_;
 
-  float marker_length_ = 0.0f;
+    ArucoDetector detector_;
 
-  void imageCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam_info);
+    bool use_resolve_ = false;
+
+    float marker_length_ = 0.0f;
+
+    void imageCallback(const sensor_msgs::ImageConstPtr &img, const sensor_msgs::CameraInfoConstPtr &cam_info);
 };
 
 

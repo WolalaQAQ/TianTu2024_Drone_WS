@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     lsb-release \
     software-properties-common \
     build-essential \
+    openssh-server \
     && rm -rf /var/lib/apt/lists/*
 
 # 添加ROS源并安装ROS Melodic
@@ -54,5 +55,25 @@ COPY ./src /root/catkin_ws/src
 # RUN apt-get update && apt-get install -y <additional-packages>
 # RUN pip install <python-packages>
 
-# 默认启动bash
-CMD ["bash"]
+# 创建SSH目录
+RUN mkdir /var/run/sshd
+
+# 设置root密码（可以根据需要更改）
+RUN echo 'root:123456' | chpasswd
+
+# 允许root通过SSH登录
+RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+# 禁用pam登录限制
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -i 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' /etc/pam.d/sshd
+
+# 设置环境变量
+ENV NOTVISIBLE "in users profile"
+RUN echo "export VISIBLE=now" >> /etc/profile
+
+# 暴露SSH端口
+EXPOSE 22
+
+# 启动SSH服务器
+CMD ["/usr/sbin/sshd", "-D"]
