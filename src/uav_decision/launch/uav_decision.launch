@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Robot Decision -->
+  <!-- 加载YAML文件中的参数 -->
+  <rosparam file="$(find uav_decision)/params/params.yaml" command="load"/>
+
+  <node pkg="uav_decision" type="uav_decision_node" name="uav_decision" output="screen">
+
+  </node>
+
+</launch>
