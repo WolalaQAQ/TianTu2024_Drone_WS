@@ -62,6 +62,20 @@ void UavDecision::work(){
 
 void UavDecision::Detectmode(){
     ROS_INFO("Detect mode");
+    gimbalcontrol.request.pitch = -90;
+    bool tiaojian = gimbalControlclient_.call(gimbalcontrol);
+    ros::Duration(1).sleep();
+    gimbalcontrol.request.pitch = -90;
+    tiaojian = gimbalControlclient_.call(gimbalcontrol);
+    if(tiaojian)
+        {
+            ROS_INFO("gimbalcontrol success!!!!!");
+            ros::Duration(5).sleep();
+        }
+        else
+        {
+            ROS_INFO("gimbalcontrol failed!!!!!!");
+        }
     // 将相机画面中心移动到aruco的中心的像素点的一定范围内
     if(aruco_point_.point.x < img_width_/2 - 50){
         aruco_speed_.at<float>(1, 0) = speed;
