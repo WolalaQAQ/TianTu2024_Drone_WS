@@ -3,9 +3,10 @@
 UavDecision::UavDecision(ros::NodeHandle &nh):nh_(nh){
     ROS_INFO("UavDecision initialized");
     nh_.getParam("/target_points", target_points_flat_);
-    nh_.getParam("map_north_angle", map_north_angle_);
-    nh_.getParam("speed", speed);
-    nh_.getParam("fly_time", fly_time_);
+    // 这些是充电区的参数，和move2Target函数中的参数不一样
+    nh_.getParam("/map_north_angle", map_north_angle_);
+    nh_.getParam("/speed", speed);
+    nh_.getParam("/fly_time", fly_time_);
 
     for(int i = 0; i < target_points_flat_.size(); i+=3){
         uav_points temp;
@@ -21,7 +22,7 @@ UavDecision::UavDecision(ros::NodeHandle &nh):nh_(nh){
     takeoffOrLandingclient_ = nh_.serviceClient<ttauav_node::takeoffOrLanding>("takeoffOrLanding");
     // TODO:这个地方应该用像素点方案，后续会修改
     // aruco_pose_sub_ = nh_.subscribe("aruco_singler/pose", 5, &UavDecision::arucoposeCallback, this);
-
+    aruco_pose_sub_ = nh_.subscribe("/aruco_node/marker_point",5,&UavDecision::arucoposeCallback,this);
     work_thread_ = std::make_shared<std::thread>(&UavDecision::work, this);
 
 }
@@ -46,6 +47,9 @@ void UavDecision::work(){
                 move2Target();
             }
             else if(current_state_ == 2){
+                Detectmode();
+            }
+            else if(current_state_ == 3){
                 Landingmode();
             }
             else{
@@ -56,13 +60,70 @@ void UavDecision::work(){
     }
 }
 
+void UavDecision::Detectmode(){
+    ROS_INFO("Detect mode");
+    // 将相机画面中心移动到aruco的中心的像素点的一定范围内
+    if(aruco_point_.point.x < img_width_/2 - 50){
+        aruco_speed_.at<float>(0, 0) = -speed;
+    }
+    else if(aruco_point_.point.x > img_width_/2 + 50){
+        aruco_speed_.at<float>(0, 0) = speed;
+    }
+    if(aruco_point_.point.y < img_height_/2 - 50){
+        aruco_speed_.at<float>(1, 0) = -speed;
+    }
+    else if(aruco_point_.point.y > img_height_/2 + 50){
+        aruco_speed_.at<float>(1, 0) = speed;
+    }
+    float rotation_data[4] = { cos(map_north_angle_), -sin(map_north_angle_),
+                               sin(map_north_angle_), cos(map_north_angle_) };
+    cv::Mat rotation_matrix = cv::Mat(2, 2, CV_32F, rotation_data).clone();
+    cv::Mat vel_rotated = rotation_matrix * aruco_speed_;
+    flightbyVel.request.vel_n = vel_rotated.at<float>(0, 0);
+    flightbyVel.request.vel_e = vel_rotated.at<float>(1, 0);
+    flightbyVel.request.vel_d = 0;
+    flightbyVel.request.fly_time = fly_time_;
+    flightByVelclient_.call(flightbyVel);
+    bool ack = flightByVelclient_.call(flightbyVel);
+    if(ack){
+        ROS_INFO("move to aruco success!!");
+    }
+    else{
+        ROS_INFO("move to aruco failed!!");
+    }
+    if(aruco_point_.point.x < img_width_/2 + 50 && aruco_point_.point.x > img_width_/2 - 50 &&
+        aruco_point_.point.y < img_height_/2 + 50 && aruco_point_.point.y > img_height_/2 - 50){
+        takeofforLanding.request.takeoffOrLanding = 2;
+        bool ack = takeoffOrLandingclient_.call(takeofforLanding);
+        if(ack){
+            ROS_INFO("landing success!!");
+            ros::Duration(10).sleep();
+        }
+        else{
+            ROS_INFO("landing faied!!");
+        }
+        takeofforLanding.request.takeoffOrLanding = 1;
+        bool ack1 = takeoffOrLandingclient_.call(takeofforLanding);
+        if(ack1){
+            ROS_INFO("takeoff success!!");
+            ros::Duration(10).sleep();
+            current_state_ = 3;
+        }
+        else{
+            ROS_INFO("takeoff faied!!");
+        }
+        
+    }
+
+}
+
 void UavDecision::Takeoffmode(){
     takeofforLanding.request.takeoffOrLanding = 1;
     bool ack = takeoffOrLandingclient_.call(takeofforLanding);
 
     if(ack){
         ROS_INFO("takeoff success!!");
-        ros::Duration(10).sleep();
+        ros::Duration(6).sleep();
         current_state_ = 1;
     }
     else{
@@ -120,4 +181,10 @@ bool UavDecision::startCallback(std_srvs::Trigger::Request &req, std_srvs::Trigg
     res.success = true;
     ROS_INFO("Start processing set to: %s", start_processing ? "true" : "false");
     return true;
+}
+
+void UavDecision::arucoposeCallback(const geometry_msgs::PointStamped::ConstPtr& msg){
+    aruco_point_ = *msg;
+    ROS_INFO("Get aruco point: %f, %f, %f", aruco_point_.point.x, 
+        aruco_point_.point.y, aruco_point_.point.z);
 }

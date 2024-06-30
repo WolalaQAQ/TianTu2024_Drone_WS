@@ -6,6 +6,7 @@
 #include <std_srvs/Trigger.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/PointStamped.h>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 
@@ -59,10 +60,10 @@ class UavDecision{
         void move2Target();
         void Landingmode();
         void Takeoffmode();
-        void Detectmdoe();
+        void Detectmode();
 
         bool startCallback(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
-
+        void arucoposeCallback(const geometry_msgs::PointStamped::ConstPtr& msg);
     private:
         // utils
         transposed_points speed_resolver(uav_points target_point);
@@ -73,11 +74,17 @@ class UavDecision{
         double speed;
         double fly_time_;
         std::vector<double> target_points_flat_;
+        
+        // 静态参数
+        float img_width_ = 1440;
+        float img_height_ = 1080;
 
-        geometry_msgs::PoseStamped aruco_pose_;
+        // 状态参数
+        geometry_msgs::PointStamped aruco_point_;
         cv::Mat velocity_ = cv::Mat::zeros(2, 1, CV_32F);
         std::vector<uav_points> target_points_;
-        
+        cv::Mat aruco_speed_ = cv::Mat::zeros(2, 1, CV_32F);
+
         bool start_processing = false;
         int current_state_ = 0;
 
