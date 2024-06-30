@@ -10,7 +10,7 @@ project(fuck_aruco_ros)
 
 #set(cv_bridge_DIR /home/wolala/cv_bridge_4.10/share/cv_bridge/cmake)
 
-set(OpenCV_DIR /usr/lib/x86_64-linux-gnu/cmake/opencv4)
+# set(OpenCV_DIR /usr/lib/x86_64-linux-gnu/cmake/opencv4)
 
 find_package(catkin REQUIRED COMPONENTS
         roscpp
@@ -28,7 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-find_package(OpenCV REQUIRED NO_DEFAULT_PATH)
+find_package(OpenCV REQUIRED)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
