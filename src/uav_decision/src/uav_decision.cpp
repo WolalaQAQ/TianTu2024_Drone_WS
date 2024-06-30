@@ -64,16 +64,16 @@ void UavDecision::Detectmode(){
     ROS_INFO("Detect mode");
     // 将相机画面中心移动到aruco的中心的像素点的一定范围内
     if(aruco_point_.point.x < img_width_/2 - 50){
-        aruco_speed_.at<float>(0, 0) = -speed;
+        aruco_speed_.at<float>(1, 0) = speed;
     }
     else if(aruco_point_.point.x > img_width_/2 + 50){
-        aruco_speed_.at<float>(0, 0) = speed;
-    }
-    if(aruco_point_.point.y < img_height_/2 - 50){
         aruco_speed_.at<float>(1, 0) = -speed;
     }
+    if(aruco_point_.point.y < img_height_/2 - 50){
+        aruco_speed_.at<float>(0, 0) = speed;
+    }
     else if(aruco_point_.point.y > img_height_/2 + 50){
-        aruco_speed_.at<float>(1, 0) = speed;
+        aruco_speed_.at<float>(0, 0) = -speed;
     }
     float rotation_data[4] = { cos(map_north_angle_), -sin(map_north_angle_),
                                sin(map_north_angle_), cos(map_north_angle_) };
