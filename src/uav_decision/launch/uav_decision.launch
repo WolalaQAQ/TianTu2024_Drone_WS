@@ -3,7 +3,8 @@
   <!-- Robot Decision -->
   <!-- 加载YAML文件中的参数 -->
   <rosparam file="$(find uav_decision)/params/params.yaml" command="load"/>
-
+  <node pkg="ttauav_node" type="uavdata" name="uavdata" />
+  <node pkg="ttauav_node" type="service" name="service" output="screen" />
   <node pkg="uav_decision" type="uav_decision_node" name="uav_decision" output="screen">
 
   </node>
