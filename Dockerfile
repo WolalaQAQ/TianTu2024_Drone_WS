@@ -21,7 +21,7 @@ RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main"
     && rm -rf /var/lib/apt/lists/*
 
 # 初始化rosdep
-RUN rosdep init && rosdep update
+# RUN rosdep init && rosdep update
 
 # 设置ROS环境变量
 SHELL ["/bin/bash", "-c"]
@@ -48,7 +48,7 @@ RUN /bin/bash -c "source /opt/ros/melodic/setup.bash && catkin_init_workspace /r
 WORKDIR /root/catkin_ws
 
 # 复制你的ROS包到工作空间（如果有的话）
-# COPY ./your_ros_package /root/catkin_ws/src/your_ros_package
+COPY ./src /root/catkin_ws/src
 
 # 安装任何额外的系统依赖或Python包
 # RUN apt-get update && apt-get install -y <additional-packages>
