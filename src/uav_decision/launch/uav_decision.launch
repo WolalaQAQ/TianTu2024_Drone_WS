@@ -5,6 +5,8 @@
   <rosparam file="$(find uav_decision)/params/params.yaml" command="load"/>
   <node pkg="ttauav_node" type="uavdata" name="uavdata" />
   <node pkg="ttauav_node" type="service" name="service" output="screen" />
+  <node pkg="uav_cam" type = "uav_cam_node" name="uav_cam_node"/>
+  <include file="$(find fuck_aruco_ros)/launch/aruco_node.launch">
   <node pkg="uav_decision" type="uav_decision_node" name="uav_decision" output="screen">
     <param name="/speed" type ="double" value="0.1"/>
     <param name="/fly_time" type ="double" value="0.5"/>
