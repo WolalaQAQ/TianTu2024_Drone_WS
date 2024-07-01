@@ -17,6 +17,10 @@ UavDecision::UavDecision(ros::NodeHandle &nh):nh_(nh){
         target_points_.push_back(temp);
     }
 
+    aruco_point_.point.x = -1;
+    aruco_point_.point.y = -1;
+
+
     start_service_ = nh_.advertiseService("start_processing", &UavDecision::startCallback, this);
     flightByVelclient_ = nh_.serviceClient<ttauav_node::flightByVel>("flightByVel");
     gimbalControlclient_ = nh_.serviceClient<ttauav_node::gimbalControl>("gimbalControl");
@@ -60,6 +64,17 @@ void UavDecision::work(){
 }
 
 void UavDecision::Detectmode(){
+    if(aruco_point_.point.x == -1 && aruco_point_.point.y == -1){
+        ROS_INFO("No aruco detected");
+        return;
+    }
+    // 检测aruco时间戳，如果太远也return
+    double current_time = ros::Time::now().toSec();
+    double aruco_time = aruco_point_.header.stamp.toSec();
+    if(current_time - aruco_time > 3){
+        ROS_INFO("Aruco too old");
+        return;
+    }
     ROS_INFO("Detect mode");
     double speedx, speedy;
     aruco_pid_tracker(speedx, speedy);
