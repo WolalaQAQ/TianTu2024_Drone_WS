@@ -68,12 +68,15 @@ class UavDecision{
         // utils
         transposed_points speed_resolver(uav_points target_point);
 
+        void aruco_pid_tracker(double &speedx, double &speedy);
+
     private:
         // 动态参数
         double map_north_angle_;
         double speed;
         double fly_time_;
         std::vector<double> target_points_flat_;
+        double Kp_ = 0.002;
         
         // 静态参数
         float img_width_ = 1440;

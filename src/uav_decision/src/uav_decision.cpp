@@ -7,6 +7,7 @@ UavDecision::UavDecision(ros::NodeHandle &nh):nh_(nh){
     nh_.getParam("/map_north_angle", map_north_angle_);
     nh_.getParam("/speed", speed);
     nh_.getParam("/fly_time", fly_time_);
+    nh_.getParam("/Kp", Kp_);
 
     for(int i = 0; i < target_points_flat_.size(); i+=3){
         uav_points temp;
@@ -20,8 +21,6 @@ UavDecision::UavDecision(ros::NodeHandle &nh):nh_(nh){
     flightByVelclient_ = nh_.serviceClient<ttauav_node::flightByVel>("flightByVel");
     gimbalControlclient_ = nh_.serviceClient<ttauav_node::gimbalControl>("gimbalControl");
     takeoffOrLandingclient_ = nh_.serviceClient<ttauav_node::takeoffOrLanding>("takeoffOrLanding");
-    // TODO:这个地方应该用像素点方案，后续会修改
-    // aruco_pose_sub_ = nh_.subscribe("aruco_singler/pose", 5, &UavDecision::arucoposeCallback, this);
     aruco_pose_sub_ = nh_.subscribe("/aruco_node/marker_point",5,&UavDecision::arucoposeCallback,this);
     work_thread_ = std::make_shared<std::thread>(&UavDecision::work, this);
 
@@ -62,33 +61,10 @@ void UavDecision::work(){
 
 void UavDecision::Detectmode(){
     ROS_INFO("Detect mode");
-    gimbalcontrol.request.pitch = -90;
-    bool tiaojian = gimbalControlclient_.call(gimbalcontrol);
-    ros::Duration(1).sleep();
-    gimbalcontrol.request.pitch = -90;
-    tiaojian = gimbalControlclient_.call(gimbalcontrol);
-    if(tiaojian)
-        {
-            ROS_INFO("gimbalcontrol success!!!!!");
-            ros::Duration(5).sleep();
-        }
-        else
-        {
-            ROS_INFO("gimbalcontrol failed!!!!!!");
-        }
-    // 将相机画面中心移动到aruco的中心的像素点的一定范围内
-    if(aruco_point_.point.x < img_width_/2 - 50){
-        aruco_speed_.at<float>(1, 0) = speed;
-    }
-    else if(aruco_point_.point.x > img_width_/2 + 50){
-        aruco_speed_.at<float>(1, 0) = -speed;
-    }
-    if(aruco_point_.point.y < img_height_/2 - 50){
-        aruco_speed_.at<float>(0, 0) = speed;
-    }
-    else if(aruco_point_.point.y > img_height_/2 + 50){
-        aruco_speed_.at<float>(0, 0) = -speed;
-    }
+    double speedx, speedy;
+    aruco_pid_tracker(speedx, speedy);
+    aruco_speed_.at<float>(1, 0) = float(speedx);
+    aruco_speed_.at<float>(0, 0) = float(speedy);
     float rotation_data[4] = { cos(map_north_angle_), -sin(map_north_angle_),
                                sin(map_north_angle_), cos(map_north_angle_) };
     cv::Mat rotation_matrix = cv::Mat(2, 2, CV_32F, rotation_data).clone();
@@ -132,6 +108,7 @@ void UavDecision::Detectmode(){
 }
 
 void UavDecision::Takeoffmode(){
+
     takeofforLanding.request.takeoffOrLanding = 1;
     bool ack = takeoffOrLandingclient_.call(takeofforLanding);
 
@@ -142,6 +119,37 @@ void UavDecision::Takeoffmode(){
     }
     else{
         ROS_INFO("takeoff faied!!");
+    }
+
+    // 云台调整为朝向正下方
+    gimbalcontrol.request.pitch = -90;
+    bool tiaojian = gimbalControlclient_.call(gimbalcontrol);
+    ros::Duration(1).sleep();
+    gimbalcontrol.request.pitch = -90;
+    tiaojian = gimbalControlclient_.call(gimbalcontrol);
+    if(tiaojian)
+        {
+            ROS_INFO("gimbalcontrol success!!!!!");
+            ros::Duration(5).sleep();
+        }
+        else
+        {
+            ROS_INFO("gimbalcontrol failed!!!!!!");
+        }
+
+    // 调整飞行高度
+    flightbyVel.request.vel_n = 0;
+    flightbyVel.request.vel_e = 0;
+    flightbyVel.request.vel_d = 0.25;
+    flightbyVel.request.fly_time = 2000;
+    flightByVelclient_.call(flightbyVel);
+    bool ack1 = flightByVelclient_.call(flightbyVel);
+    if(ack1){
+        ROS_INFO("move up success!!");
+        ros::Duration(3).sleep();
+    }
+    else{
+        ROS_INFO("move up failed!!");
     }
 
 }
@@ -201,4 +209,12 @@ void UavDecision::arucoposeCallback(const geometry_msgs::PointStamped::ConstPtr&
     aruco_point_ = *msg;
     ROS_INFO("Get aruco point: %f, %f, %f", aruco_point_.point.x, 
         aruco_point_.point.y, aruco_point_.point.z);
+}
+
+void UavDecision::aruco_pid_tracker(double &speedx, double &speedy){
+    double errx = img_width_/2 - aruco_point_.point.x;
+    double erry = img_height_/2 - aruco_point_.point.y;
+    speedx = - Kp_ * errx;
+    speedy = - Kp_ * erry;
+
 }
