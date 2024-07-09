@@ -5,7 +5,7 @@
 #include <opencv2/opencv.hpp>
 #include "many_rect_detector/many_rect_detector.h"
 #include <geometry_msgs/PointStamped.h>
-#include <stdio.h>
+#include <cstdio>
 #include <iostream>
 #include <chrono>
 #include <thread>

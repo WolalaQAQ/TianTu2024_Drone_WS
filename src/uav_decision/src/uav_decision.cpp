@@ -8,26 +8,26 @@ UavDecision::UavDecision(ros::NodeHandle &nh):nh_(nh){
     nh_.getParam("/speed", speed);
     nh_.getParam("/fly_time", fly_time_);
     nh_.getParam("/Kp", Kp_);
-
-
+	nh_.getParam("/x_offset", x_offset_);
+	nh_.getParam("/y_offset", y_offset_);
 
     for(int i = 0; i < target_points_flat_.size(); i+=3){
-        uav_points temp;
+        uav_points temp{};
         temp.vel_x = target_points_flat_[i];
         temp.angel = target_points_flat_[i+1];
         temp.time = target_points_flat_[i+2];
         target_points_.push_back(temp);
     }
 
-    aruco_point_.point.x = -1;
-    aruco_point_.point.y = -1;
+	detector_point_.point.x = -1;
+	detector_point_.point.y = -1;
 
 
     start_service_ = nh_.advertiseService("start_processing", &UavDecision::startCallback, this);
     flightByVelclient_ = nh_.serviceClient<ttauav_node::flightByVel>("flightByVel");
     gimbalControlclient_ = nh_.serviceClient<ttauav_node::gimbalControl>("gimbalControl");
     takeoffOrLandingclient_ = nh_.serviceClient<ttauav_node::takeoffOrLanding>("takeoffOrLanding");
-    aruco_pose_sub_ = nh_.subscribe("/aruco_node/marker_point",5,&UavDecision::arucoposeCallback,this);
+	detector_point_sub_ = nh_.subscribe("/many_rect_detector/center", 5, &UavDecision::detectorPointCallback, this);
     work_thread_ = std::make_shared<std::thread>(&UavDecision::work, this);
 
 }
@@ -66,24 +66,24 @@ void UavDecision::work(){
 }
 
 void UavDecision::Detectmode(){
-    if(aruco_point_.point.x == -1 && aruco_point_.point.y == -1){
-        ROS_INFO("No aruco detected");
+    if(detector_point_.point.x == -1 && detector_point_.point.y == -1) {
+        ROS_INFO("No mark detected");
         return;
     }
     // 检测aruco时间戳，如果太远也return
     double current_time = ros::Time::now().toSec();
-    double aruco_time = aruco_point_.header.stamp.toSec();
-    if(current_time - aruco_time > 10){
-        ROS_INFO("Aruco too old");
+    double aruco_time = detector_point_.header.stamp.toSec();
+    if(current_time - aruco_time > 3){
+        ROS_INFO("detect point too old");
         return;
     }
     ROS_INFO("Detect mode");
     double speedx, speedy;
-    aruco_pid_tracker(speedx, speedy);
+    detect_point_pid_tracker(speedx, speedy);
     aruco_speed_.at<float>(1, 0) = float(speedx);
     aruco_speed_.at<float>(0, 0) = float(speedy);
-    float rotation_data[4] = { cos(map_north_angle_), -sin(map_north_angle_),
-                               sin(map_north_angle_), cos(map_north_angle_) };
+    float rotation_data[4] = { static_cast<float>(cos(map_north_angle_)), static_cast<float>(-sin(map_north_angle_)),
+                               static_cast<float>(sin(map_north_angle_)), static_cast<float>(cos(map_north_angle_)) };
     cv::Mat rotation_matrix = cv::Mat(2, 2, CV_32F, rotation_data).clone();
     cv::Mat vel_rotated = rotation_matrix * aruco_speed_;
     flightbyVel.request.vel_n = vel_rotated.at<float>(0, 0);
@@ -98,8 +98,8 @@ void UavDecision::Detectmode(){
     else{
         ROS_INFO("move to aruco failed!!");
     }
-    if(aruco_point_.point.x < img_width_/2 + 50 && aruco_point_.point.x > img_width_/2 - 50 &&
-        aruco_point_.point.y < img_height_/2 + 50 && aruco_point_.point.y > img_height_/2 - 50){
+    if(detector_point_.point.x < img_width_/2 + 50 && detector_point_.point.x > img_width_/2 - 50 &&
+        detector_point_.point.y < img_height_/2 + 50 && detector_point_.point.y > img_height_/2 - 50){
         takeofforLanding.request.takeoffOrLanding = 2;
         bool ack = takeoffOrLandingclient_.call(takeofforLanding);
         if(ack){
@@ -186,8 +186,8 @@ void UavDecision::Landingmode(){
 }
 
 void UavDecision::move2Target(){
-    for(int i = 0; i < target_points_.size(); i++){
-        transposed_points velocity_ = speed_resolver(target_points_[i]);
+    for (const auto & target_point : target_points_) {
+        transposed_points velocity_ = speed_resolver(target_point);
         flightbyVel.request.vel_n = velocity_.vel_n;
         flightbyVel.request.vel_e = velocity_.vel_e;
         flightbyVel.request.vel_d = velocity_.vel_d;
@@ -206,7 +206,7 @@ transposed_points UavDecision::speed_resolver(uav_points target_point){
     cv::Mat rotation_matrix_ = cv::Mat(2, 2, CV_32F, rotation_data).clone();
     cv::Mat vel = (cv::Mat_<float>(2, 1) << target_point.vel_x, 0);
     cv::Mat vel_rotated = rotation_matrix_ * vel;
-    transposed_points temp;
+    transposed_points temp{};
     temp.vel_n = vel_rotated.at<float>(0, 0);
     temp.vel_e = vel_rotated.at<float>(1, 0);
     temp.vel_d = 0;
@@ -222,15 +222,15 @@ bool UavDecision::startCallback(std_srvs::Trigger::Request &req, std_srvs::Trigg
     return true;
 }
 
-void UavDecision::arucoposeCallback(const geometry_msgs::PointStamped::ConstPtr& msg){
-    aruco_point_ = *msg;
-    ROS_INFO("Get aruco point: %f, %f, %f", aruco_point_.point.x, 
-        aruco_point_.point.y, aruco_point_.point.z);
+void UavDecision::detectorPointCallback(const geometry_msgs::PointStamped::ConstPtr& msg){
+	detector_point_ = *msg;
+    ROS_INFO("Get detect point: %f, %f, %f", detector_point_.point.x,
+			 detector_point_.point.y, detector_point_.point.z);
 }
 
-void UavDecision::aruco_pid_tracker(double &speedx, double &speedy){
-    double errx = img_width_/2 - aruco_point_.point.x;
-    double erry = img_height_/2 - aruco_point_.point.y;
+void UavDecision::detect_point_pid_tracker(double &speedx, double &speedy) const{
+    double errx = img_width_/2 - detector_point_.point.x;
+    double erry = img_height_/2 - detector_point_.point.y;
     speedx = Kp_ * errx;
     speedy = Kp_ * erry;
 

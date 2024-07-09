@@ -48,7 +48,7 @@ int main(int argc, char** argv){
                 }
 
             // 想地图正前方前进0.3m
-            float angle_rad = 230 * CV_PI / 180.0; // 将角度转换为弧度
+            float angle_rad = 0 * CV_PI / 180.0; // 将角度转换为弧度
             float rotation_data[4] = { cos(angle_rad), -sin(angle_rad),
                                     sin(angle_rad), cos(angle_rad) };
             cv::Mat rotation_matrix = cv::Mat(2, 2, CV_32F, rotation_data).clone();
@@ -56,7 +56,7 @@ int main(int argc, char** argv){
             cv::Mat vel_rotated = rotation_matrix * vel;
             flightbyVel.request.vel_n = vel_rotated.at<float>(0, 0);
             flightbyVel.request.vel_e = vel_rotated.at<float>(1, 0);
-            flightbyVel.request.fly_time = 1;
+            flightbyVel.request.fly_time = 1000;
             flightByVelclient.call(flightbyVel);
             ROS_INFO("move forward 0.3m");
             if(!flightByVelclient.call(flightbyVel)){

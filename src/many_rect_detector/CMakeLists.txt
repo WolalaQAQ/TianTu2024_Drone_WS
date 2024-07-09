@@ -20,8 +20,6 @@ set(OpenCV_DIR /usr/lib/x86_64-linux-gnu/cmake/opencv4)
 find_package(OpenCV REQUIRED)
 
 
-
-
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
@@ -108,10 +106,10 @@ find_package(OpenCV REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#          INCLUDE_DIRS include
-#          LIBRARIES many_rect_detector
-#          CATKIN_DEPENDS roscpp
-#          DEPENDS system_lib
+        #          INCLUDE_DIRS include
+        #          LIBRARIES many_rect_detector
+        #          CATKIN_DEPENDS roscpp
+        #          DEPENDS system_lib
 )
 
 ###########
@@ -124,15 +122,13 @@ include_directories(
         include
         ${catkin_INCLUDE_DIRS}
         ${T507_SDK_INCLUDE_DIRS}
-	decoder/include
+        decoder/include
 )
 
 link_directories(
-	${T507_SDK_LINK_DIRS}
-	decoder/lib
+        ${T507_SDK_LINK_DIRS}
+        decoder/lib
 )
-
-
 
 
 ## Declare a C++ library
@@ -153,7 +149,9 @@ add_executable(${PROJECT_NAME}_node
         src/main.cpp
 )
 
-add_executable(decodertest decoder/main.cpp)
+add_executable(decodertest
+        decoder/main.cpp
+)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -169,11 +167,12 @@ add_executable(decodertest decoder/main.cpp)
 target_link_libraries(${PROJECT_NAME}_node
         ${catkin_LIBRARIES}
         ${OpenCV_LIBS}
-        TTARtspPusher 
+        TTARtspPusher
         DjiRtspImageSource
 )
 
-target_link_libraries(decodertest TTARtspPusher DjiRtspImageSource)
+target_link_libraries(decodertest
+        TTARtspPusher DjiRtspImageSource)
 
 #############
 ## Install ##
