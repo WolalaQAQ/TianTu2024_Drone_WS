@@ -8,8 +8,8 @@
   <include file="$(find many_rect_detector)/launch/many_rect_detector_node.launch"/>
   <node pkg="uav_decision" type="uav_decision_node" name="uav_decision" output="screen">
     <param name="/speed" type ="double" value="0.1"/>
-    <param name="/fly_time" type ="double" value="1"/>
-    <param name="/map_north_angle" type ="double" value="237"/>
+    <param name="/fly_time" type ="double" value="300"/>
+    <param name="/map_north_angle" type ="double" value="0"/>
     <param name="/Kp" type="double" value = "0.001"/>
 
     <param name="/x_offset" value = "-13"/>

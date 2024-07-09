@@ -80,26 +80,28 @@ void UavDecision::Detectmode(){
     ROS_INFO("Detect mode");
     double speedx, speedy;
     detect_point_pid_tracker(speedx, speedy);
-    aruco_speed_.at<float>(1, 0) = float(speedx);
-    aruco_speed_.at<float>(0, 0) = float(speedy);
+	cv::Mat detect_point_track_speed = cv::Mat::zeros(2, 1, CV_32F);
+	detect_point_track_speed.at<float>(1, 0) = float(speedx);
+	detect_point_track_speed.at<float>(0, 0) = float(speedy);
     float rotation_data[4] = { static_cast<float>(cos(map_north_angle_)), static_cast<float>(-sin(map_north_angle_)),
                                static_cast<float>(sin(map_north_angle_)), static_cast<float>(cos(map_north_angle_)) };
     cv::Mat rotation_matrix = cv::Mat(2, 2, CV_32F, rotation_data).clone();
-    cv::Mat vel_rotated = rotation_matrix * aruco_speed_;
-    flightbyVel.request.vel_n = vel_rotated.at<float>(0, 0);
-    flightbyVel.request.vel_e = vel_rotated.at<float>(1, 0);
+    cv::Mat vel_rotated = rotation_matrix * detect_point_track_speed;
+    flightbyVel.request.vel_n = detect_point_track_speed.at<float>(0, 0);
+    flightbyVel.request.vel_e = detect_point_track_speed.at<float>(1, 0);
     flightbyVel.request.vel_d = 0;
     flightbyVel.request.fly_time = fly_time_;
-    flightByVelclient_.call(flightbyVel);
+//    flightByVelclient_.call(flightbyVel);
     bool ack = flightByVelclient_.call(flightbyVel);
     if(ack){
         ROS_INFO("move to aruco success!!");
+		ros::Duration(3).sleep();
     }
     else{
         ROS_INFO("move to aruco failed!!");
     }
-    if(detector_point_.point.x < img_width_/2 + 50 && detector_point_.point.x > img_width_/2 - 50 &&
-        detector_point_.point.y < img_height_/2 + 50 && detector_point_.point.y > img_height_/2 - 50){
+
+    if(abs(detector_point_.point.x - img_width_) < 50 && abs(detector_point_.point.y - img_height_) < 50) {
         takeofforLanding.request.takeoffOrLanding = 2;
         bool ack = takeoffOrLandingclient_.call(takeofforLanding);
         if(ack){
@@ -229,9 +231,9 @@ void UavDecision::detectorPointCallback(const geometry_msgs::PointStamped::Const
 }
 
 void UavDecision::detect_point_pid_tracker(double &speedx, double &speedy) const{
-    double errx = img_width_/2 - detector_point_.point.x;
-    double erry = img_height_/2 - detector_point_.point.y;
-    speedx = Kp_ * errx;
+    double errx = img_width_/2 + x_offset_ - detector_point_.point.x;
+    double erry = img_height_/2 + y_offset_ - detector_point_.point.y;
+    speedx = -Kp_ * errx;
     speedy = Kp_ * erry;
 
 }

@@ -86,9 +86,7 @@ class UavDecision{
 
         // 状态参数
         geometry_msgs::PointStamped detector_point_;
-        cv::Mat velocity_ = cv::Mat::zeros(2, 1, CV_32F);
         std::vector<uav_points> target_points_;
-        cv::Mat aruco_speed_ = cv::Mat::zeros(2, 1, CV_32F);
 
         bool start_processing = false;
         int current_state_ = 0;
