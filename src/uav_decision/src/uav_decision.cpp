@@ -9,6 +9,8 @@ UavDecision::UavDecision(ros::NodeHandle &nh):nh_(nh){
     nh_.getParam("/fly_time", fly_time_);
     nh_.getParam("/Kp", Kp_);
 
+
+
     for(int i = 0; i < target_points_flat_.size(); i+=3){
         uav_points temp;
         temp.vel_x = target_points_flat_[i];
