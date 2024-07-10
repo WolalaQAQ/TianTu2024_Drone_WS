@@ -10,20 +10,31 @@
 #include <chrono>
 #include <thread>
 #include <DjiRtspImageSource.h>
+#include <std_msgs/Bool.h>
 
 std::string center_topic;
 bool use_rtsp = false;
 std::string rtsp_url;
 bool save_image = false;
-
+bool camera_status_from_sub = false;
+bool camera_status_true = false;
 
 static inline int64_t now() {
 	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
+void cameraStatusCallback(const std_msgs::Bool::ConstPtr& msg) {
+	if (msg->data != camera_status_from_sub) {
+		camera_status_from_sub = msg->data;
+	}
+}
+
 int main(int argc, char** argv) {
     ros::init(argc, argv, "many_rect_detector_node");
 	ros::NodeHandle nh;
+
+	ros::Publisher pub = nh.advertise<geometry_msgs::PointStamped>("center", 1);
+	ros::Subscriber cam_status_sub = nh.subscribe("camera_status", 1, cameraStatusCallback);
 
 	nh.getParam("/many_rect_detector/use_rtsp", use_rtsp);
 	nh.getParam("/many_rect_detector/rtsp_url", rtsp_url);
@@ -38,6 +49,7 @@ int main(int argc, char** argv) {
 
 	DjiRtspImageSource service(rtsp_url);
 	int64_t last_time = now();
+
 	service.setImageCallback(nullptr, [&](void* handler, uint8_t* frmdata, int frmsize, int width, int height, int pixfmt) -> void {
 		// ROS_INFO("Image %d@%p  --  %dx%d -- %d\n", frmsize, frmdata, width, height, pixfmt);
 		
@@ -72,9 +84,9 @@ int main(int argc, char** argv) {
 				// ROS_INFO("not find");
 			}
 
-			static int counter = 0;
 			if (save_image) {
 				char name[64];
+				static int counter = 0;
 				sprintf(name, "/root/TianTu2024_Drone_WS/images/%dx%d-%d_%d.jpg", width, height, pixfmt, ++counter);
 				cv::imwrite(name, image);
 			}
@@ -82,8 +94,23 @@ int main(int argc, char** argv) {
 			delete[] rgbData;
 		}
 	});
-	service.start();
-    ros::spin();
-	service.stop();
+
+	ros::Rate rate(10);
+	while (ros::ok()) {
+		if (camera_status_from_sub) {
+			if (!camera_status_true) {
+				service.start();
+				camera_status_true = true;
+				ROS_INFO("Camera started!!!!!!!!!!!");
+			}
+		} else {
+			if (camera_status_true) {
+				service.stop();
+				camera_status_true = false;
+				ROS_INFO("Camera stopped!!!!!!!!!!!");
+			}
+		}
+	}
+
 	return 0;
 }

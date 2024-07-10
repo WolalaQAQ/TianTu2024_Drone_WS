@@ -7,6 +7,7 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PointStamped.h>
+#include <std_msgs/Bool.h>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 
@@ -46,6 +47,7 @@ class UavDecision{
         ros::ServiceServer start_service_; 
 
         ros::Subscriber detector_point_sub_;
+		ros::Publisher camera_status_pub_;
 
         ttauav_node::flightByVel flightbyVel;
         ttauav_node::takeoffOrLanding takeofforLanding;
