@@ -61,6 +61,8 @@ class UavDecision{
         void Landingmode();
         void Takeoffmode();
         void Detectmode();
+        void moveback();
+        void Detectmode_over();
 
         bool startCallback(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
         void detectorPointCallback(const geometry_msgs::PointStamped::ConstPtr& msg);

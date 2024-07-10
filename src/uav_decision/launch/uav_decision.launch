@@ -13,7 +13,7 @@
     <param name="/Kp" type="double" value = "0.001"/>
 
     <param name="/x_offset" value = "-13"/>
-    <param name="/y_offset" value = "92"/>
+    <param name="/y_offset" value = "102"/>
   </node>
 
 </launch>

@@ -55,12 +55,15 @@ void UavDecision::work(){
                 Detectmode();
             }
             else if(current_state_ == 3){
-                Landingmode();
+                moveback();
+            }
+            else if(current_state_ == 4){
+                Detectmode_over();
             }
             else{
                 ROS_INFO("Error state");
             }
-            start_processing = false;
+            // start_processing = false;
         }
     }
 }
@@ -91,11 +94,11 @@ void UavDecision::Detectmode(){
     flightbyVel.request.vel_e = detect_point_track_speed.at<float>(1, 0);
     flightbyVel.request.vel_d = 0;
     flightbyVel.request.fly_time = fly_time_;
-//    flightByVelclient_.call(flightbyVel);
+    //    flightByVelclient_.call(flightbyVel);
     bool ack = flightByVelclient_.call(flightbyVel);
     if(ack){
         ROS_INFO("move to aruco success!!");
-		ros::Duration(3).sleep();
+		ros::Duration(6).sleep();
     }
     else{
         ROS_INFO("move to aruco failed!!");
@@ -199,6 +202,71 @@ void UavDecision::move2Target(){
         ros::Duration(velocity_.fly_time/1000+2).sleep();
     }
     current_state_ = 2;
+}
+
+void UavDecision::moveback(){
+    for (const auto & target_point : target_points_) {
+        transposed_points velocity_ = speed_resolver(target_point);
+        flightbyVel.request.vel_n = -velocity_.vel_n;
+        flightbyVel.request.vel_e = -velocity_.vel_e;
+        flightbyVel.request.vel_d =  velocity_.vel_d;
+        flightbyVel.request.fly_time = velocity_.fly_time;
+        flightByVelclient_.call(flightbyVel);
+        ROS_INFO("Move back");
+        ros::Duration(velocity_.fly_time/1000+2).sleep();
+    }  
+    current_state_ = 4;
+}
+
+void UavDecision::Detectmode_over(){
+
+ if(detector_point_.point.x == -1 && detector_point_.point.y == -1) {
+        ROS_INFO("No mark detected");
+        return;
+    }
+    // 检测aruco时间戳，如果太远也return
+    double current_time = ros::Time::now().toSec();
+    double aruco_time = detector_point_.header.stamp.toSec();
+    if(current_time - aruco_time > 3){
+        ROS_INFO("detect point too old");
+        return;
+    }
+    ROS_INFO("Detect mode");
+    double speedx, speedy;
+    detect_point_pid_tracker(speedx, speedy);
+	cv::Mat detect_point_track_speed = cv::Mat::zeros(2, 1, CV_32F);
+	detect_point_track_speed.at<float>(1, 0) = float(speedx);
+	detect_point_track_speed.at<float>(0, 0) = float(speedy);
+    float rotation_data[4] = { static_cast<float>(cos(map_north_angle_)), static_cast<float>(-sin(map_north_angle_)),
+                               static_cast<float>(sin(map_north_angle_)), static_cast<float>(cos(map_north_angle_)) };
+    cv::Mat rotation_matrix = cv::Mat(2, 2, CV_32F, rotation_data).clone();
+    cv::Mat vel_rotated = rotation_matrix * detect_point_track_speed;
+    flightbyVel.request.vel_n = detect_point_track_speed.at<float>(0, 0);
+    flightbyVel.request.vel_e = detect_point_track_speed.at<float>(1, 0);
+    flightbyVel.request.vel_d = 0;
+    flightbyVel.request.fly_time = fly_time_;
+    //    flightByVelclient_.call(flightbyVel);
+    bool ack = flightByVelclient_.call(flightbyVel);
+    if(ack){
+        ROS_INFO("move to aruco success!!");
+		ros::Duration(6).sleep();
+    }
+    else{
+        ROS_INFO("move to aruco failed!!");
+    }
+
+    if(abs(detector_point_.point.x - img_width_) < 50 && abs(detector_point_.point.y - img_height_) < 50) {
+        takeofforLanding.request.takeoffOrLanding = 2;
+        bool ack = takeoffOrLandingclient_.call(takeofforLanding);
+        if(ack){
+            ROS_INFO("landing success!!");
+            ros::Duration(10).sleep();
+        }
+        else{
+            ROS_INFO("landing faied!!");
+        }
+        
+    }
 }
 
 transposed_points UavDecision::speed_resolver(uav_points target_point){
