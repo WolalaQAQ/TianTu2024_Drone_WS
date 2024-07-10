@@ -10,7 +10,7 @@
     <param name="/speed" type ="double" value="0.1"/>
     <param name="/fly_time" type ="double" value="300"/>
     <param name="/map_north_angle" type ="double" value="0"/>
-    <param name="/Kp" type="double" value = "0.001"/>
+    <param name="/Kp" type="double" value = "0.0005"/>
 
     <param name="/x_offset" value = "-13"/>
     <param name="/y_offset" value = "102"/>

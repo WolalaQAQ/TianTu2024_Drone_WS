@@ -2,9 +2,11 @@
 <launch>
   <!-- Aruco Node -->
   <node pkg="many_rect_detector" type="many_rect_detector_node" name="many_rect_detector" output="screen"> 
+    <param name="center_topic" value="/many_rect_detector/center"/>
+
     <param name="use_rtsp" type="bool" value="true" />
     <param name="rtsp_url" value="rtsp://127.0.0.1:8554/live" />
-    <param name="save_image" type="bool" value="true" />
+    <param name="save_image" type="bool" value="false" />
   </node>
 
 </launch>

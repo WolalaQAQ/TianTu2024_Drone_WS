@@ -98,13 +98,14 @@ void UavDecision::Detectmode(){
     bool ack = flightByVelclient_.call(flightbyVel);
     if(ack){
         ROS_INFO("move to aruco success!!");
-		ros::Duration(6).sleep();
+		ros::Duration(20).sleep();
     }
     else{
-        ROS_INFO("move to aruco failed!!");
+        ROS_INFO("move to marker failed!!");
     }
 
-    if(abs(detector_point_.point.x - img_width_) < 50 && abs(detector_point_.point.y - img_height_) < 50) {
+    if(abs(img_width_/2 + x_offset_ - detector_point_.point.x) < 70 && 
+        abs(img_height_/2 + y_offset_ - detector_point_.point.y) < 70) {
         takeofforLanding.request.takeoffOrLanding = 2;
         bool ack = takeoffOrLandingclient_.call(takeofforLanding);
         if(ack){
@@ -120,12 +121,15 @@ void UavDecision::Detectmode(){
             ROS_INFO("takeoff success!!");
             ros::Duration(10).sleep();
             current_state_ = 3;
+            detector_point_.point.x =-1;
+	    detector_point_.point.y = -1;
         }
         else{
             ROS_INFO("takeoff faied!!");
         }
         
     }
+   
 
 }
 
@@ -219,7 +223,6 @@ void UavDecision::moveback(){
 }
 
 void UavDecision::Detectmode_over(){
-
  if(detector_point_.point.x == -1 && detector_point_.point.y == -1) {
         ROS_INFO("No mark detected");
         return;
@@ -249,7 +252,7 @@ void UavDecision::Detectmode_over(){
     bool ack = flightByVelclient_.call(flightbyVel);
     if(ack){
         ROS_INFO("move to aruco success!!");
-		ros::Duration(6).sleep();
+		ros::Duration(20).sleep();
     }
     else{
         ROS_INFO("move to aruco failed!!");

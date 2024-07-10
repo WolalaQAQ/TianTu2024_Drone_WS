@@ -52,11 +52,11 @@ int main(int argc, char** argv){
             float rotation_data[4] = { cos(angle_rad), -sin(angle_rad),
                                     sin(angle_rad), cos(angle_rad) };
             cv::Mat rotation_matrix = cv::Mat(2, 2, CV_32F, rotation_data).clone();
-            cv::Mat vel = (cv::Mat_<float>(2, 1) << 0.3, 0);
+            cv::Mat vel = (cv::Mat_<float>(2, 1) << 0, -0.3);
             cv::Mat vel_rotated = rotation_matrix * vel;
-            flightbyVel.request.vel_n = vel_rotated.at<float>(0, 0);
-            flightbyVel.request.vel_e = vel_rotated.at<float>(1, 0);
-            flightbyVel.request.fly_time = 1000;
+            flightbyVel.request.vel_n = vel.at<float>(0, 0);
+            flightbyVel.request.vel_e = vel.at<float>(1, 0);
+            flightbyVel.request.fly_time = 500;
             flightByVelclient.call(flightbyVel);
             ROS_INFO("move forward 0.3m");
             if(!flightByVelclient.call(flightbyVel)){

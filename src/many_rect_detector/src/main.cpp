@@ -11,8 +11,11 @@
 #include <thread>
 #include <DjiRtspImageSource.h>
 
+std::string center_topic;
 bool use_rtsp = false;
 std::string rtsp_url;
+bool save_image = false;
+
 
 static inline int64_t now() {
 	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -22,17 +25,21 @@ int main(int argc, char** argv) {
     ros::init(argc, argv, "many_rect_detector_node");
 	ros::NodeHandle nh;
 
-	ros::Publisher pub = nh.advertise<geometry_msgs::PointStamped>("center", 1);
-
 	nh.getParam("/many_rect_detector/use_rtsp", use_rtsp);
 	nh.getParam("/many_rect_detector/rtsp_url", rtsp_url);
+	nh.getParam("/many_rect_detector/save_image", save_image);
+	nh.getParam("/many_rect_detector/center_topic", center_topic);
+
+	ros::Publisher pub = nh.advertise<geometry_msgs::PointStamped>(center_topic, 1);
+
+	
 
 	ROS_INFO("RTSP URL: %s", rtsp_url.c_str());
 
 	DjiRtspImageSource service(rtsp_url);
 	int64_t last_time = now();
 	service.setImageCallback(nullptr, [&](void* handler, uint8_t* frmdata, int frmsize, int width, int height, int pixfmt) -> void {
-		ROS_INFO("Image %d@%p  --  %dx%d -- %d\n", frmsize, frmdata, width, height, pixfmt);
+		// ROS_INFO("Image %d@%p  --  %dx%d -- %d\n", frmsize, frmdata, width, height, pixfmt);
 		
 		if (!frmdata) {
 			ROS_ERROR("No frame data!");
@@ -53,7 +60,7 @@ int main(int argc, char** argv) {
 			Center center = ManyRectDetector::detect(image);
 
 			if (center.if_find) {
-				ROS_INFO("center: (%f, %f)", center.x, center.y);
+				// ROS_INFO("center: (%f, %f)", center.x, center.y);
 				geometry_msgs::PointStamped msg;
 				msg.header.stamp = ros::Time::now();
 				msg.header.frame_id = "camera";
@@ -62,13 +69,15 @@ int main(int argc, char** argv) {
 				msg.point.z = 0;
 				pub.publish(msg);
 			} else {
-				ROS_INFO("not find");
+				// ROS_INFO("not find");
 			}
 
-			char name[64];
 			static int counter = 0;
-			sprintf(name, "/root/TianTu2024_Drone_WS/images/%dx%d-%d_%d.jpg", width, height, pixfmt, ++counter);
-			cv::imwrite(name, image);
+			if (save_image) {
+				char name[64];
+				sprintf(name, "/root/TianTu2024_Drone_WS/images/%dx%d-%d_%d.jpg", width, height, pixfmt, ++counter);
+				cv::imwrite(name, image);
+			}
 			
 			delete[] rgbData;
 		}
