@@ -33,17 +33,13 @@ int main(int argc, char** argv) {
     ros::init(argc, argv, "many_rect_detector_node");
 	ros::NodeHandle nh;
 
-	ros::Publisher pub = nh.advertise<geometry_msgs::PointStamped>("center", 1);
-	ros::Subscriber cam_status_sub = nh.subscribe("camera_status", 1, cameraStatusCallback);
-
 	nh.getParam("/many_rect_detector/use_rtsp", use_rtsp);
 	nh.getParam("/many_rect_detector/rtsp_url", rtsp_url);
 	nh.getParam("/many_rect_detector/save_image", save_image);
 	nh.getParam("/many_rect_detector/center_topic", center_topic);
 
 	ros::Publisher pub = nh.advertise<geometry_msgs::PointStamped>(center_topic, 1);
-
-	
+	ros::Subscriber cam_status_sub = nh.subscribe("camera_status", 1, cameraStatusCallback);
 
 	ROS_INFO("RTSP URL: %s", rtsp_url.c_str());
 
