@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
 			Center center = ManyRectDetector::detect(image);
 
 			if (center.if_find) {
-				// ROS_INFO("center: (%f, %f)", center.x, center.y);
+				 ROS_INFO("center: (%f, %f)", center.x, center.y);
 				geometry_msgs::PointStamped msg;
 				msg.header.stamp = ros::Time::now();
 				msg.header.frame_id = "camera";
@@ -106,6 +106,8 @@ int main(int argc, char** argv) {
 				ROS_INFO("Camera stopped!!!!!!!!!!!");
 			}
 		}
+
+		rate.sleep();
 	}
 
 	return 0;

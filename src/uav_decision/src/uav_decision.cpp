@@ -60,6 +60,8 @@ void UavDecision::work() {
 			}
 			// start_processing = false;
 		}
+
+		loop_rate.sleep();
 	}
 }
 
