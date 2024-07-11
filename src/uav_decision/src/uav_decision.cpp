@@ -104,7 +104,8 @@ void UavDecision::Detectmode() {
 		ROS_INFO("move to aruco failed!!");
 	}
 
-	if (abs(detector_point_.point.x - img_width_) < 50 && abs(detector_point_.point.y - img_height_) < 50) {
+	if (abs(detector_point_.point.x -x_offset_- img_width_/2) < 50 
+		&& abs(detector_point_.point.y -y_offset_- img_height_/2) < 50) {
 		takeofforLanding.request.takeoffOrLanding = 2;
 		bool ack = takeoffOrLandingclient_.call(takeofforLanding);
 		if (ack) {
