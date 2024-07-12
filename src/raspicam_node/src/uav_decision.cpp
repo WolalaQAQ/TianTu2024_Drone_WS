@@ -16,6 +16,8 @@ int X_axis_offset;
 int Y_axis_offset;
 bool no_has_wifi;
 bool first_flag = true;
+double vel_n;
+double fly_time;
 
 struct Center {
     bool iffind;
@@ -127,8 +129,7 @@ void track(cv::Mat frame, int width, int height)
             }
         }
         
-        if(abs(center.x-X_axis_offset-width/2) < 50 
-            && abs(center.y-Y_axis_offset-height) < 50){
+        if(abs(velx) < 0.05 && abs(vely) < 0.05){
             std::cout<<velnumber<<std::endl;
             velnumber++;
         }
@@ -158,10 +159,13 @@ int main(int argc, char** argv)
     gimbalControlclient = nh.serviceClient<ttauav_node::gimbalControl>("gimbalControl");
     takeoffOrLandingclient= nh.serviceClient<ttauav_node::takeoffOrLanding>("takeoffOrLanding");
 
+    
     nh.param<bool>("no_has_wifi", no_has_wifi, false);
     nh.param<int>("work_mode", work_mode, 0);
     nh.param<double>("landing_threshold", landing_threshold, 0.05);
     nh.param<double>("track_threshold", track_threshold, 0.10);
+    nh.param<double>("vel_n",vel_n,0.0);
+    nh.param<double>("fly_time",fly_time,0.0);
     nh.param<int>("X_axis_offset", X_axis_offset, -15);
     nh.param<int>("Y_axis_offset", Y_axis_offset, 92);
 
@@ -252,9 +256,8 @@ int main(int argc, char** argv)
                 cap.release();
             cap_open_flag = false;
         }
-
-        if(work_mode == 1)
-        {
+        
+        if(work_mode == 1){
             takeofforLanding.request.takeoffOrLanding = 1;
             bool ack = takeoffOrLandingclient.call(takeofforLanding);
 
@@ -294,7 +297,22 @@ int main(int argc, char** argv)
             }
 
         }
-        else if(work_mode == 2){   
+        else if(work_mode == 2){
+            flightbyVel.request.vel_n = vel_n;
+            flightbyVel.request.vel_e = 0;
+            flightbyVel.request.vel_d = 0;
+            flightbyVel.request.fly_time = fly_time;
+            flightByVelclient.call(flightbyVel);
+            bool ack1 = flightByVelclient.call(flightbyVel);
+            if (ack1) {
+                ROS_INFO("move to target success!!");
+                ros::Duration(3).sleep();
+                work_mode = 3;
+            } else {
+                ROS_INFO("move to target failed!!");
+            }
+        }
+        else if(work_mode == 3){   
             cv::Mat img(frame.rows, frame.cols, CV_8UC3, frame.data);
             std::cout<<"track work"<<std::endl;
             track(img, frame.cols, frame.rows); // 寻找矩形
@@ -305,6 +323,8 @@ int main(int argc, char** argv)
                 if(lan)
                 {
                     ROS_INFO("landing success!!");
+                    ros::Duration(5).sleep();
+                    work_mode = 4;
                 }
                 else
                 {
@@ -313,6 +333,75 @@ int main(int argc, char** argv)
                 }
             
             }
+        }
+        else if(work_mode ==4){
+            takeofforLanding.request.takeoffOrLanding = 1;
+            bool ack = takeoffOrLandingclient.call(takeofforLanding);
+            if (ack) {
+                ROS_INFO("takeoff success!!");
+                ros::Duration(6).sleep();
+            } else {
+                ROS_INFO("takeoff faied!!");
+            }
+            gimbalcontrol.request.pitch = -90;
+            bool tiaojian = gimbalControlclient.call(gimbalcontrol);
+            ros::Duration(1).sleep();
+            if (tiaojian) {
+                ROS_INFO("gimbalcontrol success!!!!!");
+            } else {
+                ROS_INFO("gimbalcontrol failed!!!!!!");
+            }
+            flightbyVel.request.vel_n = 0;
+            flightbyVel.request.vel_e = 0;
+            flightbyVel.request.vel_d = 0.25;
+            flightbyVel.request.fly_time = 2000;
+            bool ack1 = flightByVelclient.call(flightbyVel);
+            if (ack1) {
+                ROS_INFO("move up success!!");
+                ros::Duration(3).sleep();
+                work_mode = 5;
+            } else {
+                ROS_INFO("move up failed!!");
+            }
+
+        }
+        else if(work_mode == 5){
+            flightbyVel.request.vel_n = -vel_n;
+            flightbyVel.request.vel_e = 0;
+            flightbyVel.request.vel_d = 0;
+            flightbyVel.request.fly_time = fly_time;
+            flightByVelclient.call(flightbyVel);
+            bool ack1 = flightByVelclient.call(flightbyVel);
+            if (ack1) {
+                ROS_INFO("move back success!!");
+                ros::Duration(3).sleep();
+                work_mode = 6;
+            } else {
+                ROS_INFO("move back failed!!");
+            }
+        }
+        else if(work_mode == 6){
+            cv::Mat img(frame.rows, frame.cols, CV_8UC3, frame.data);
+            std::cout<<"track work"<<std::endl;
+            track(img, frame.cols, frame.rows); // 寻找矩形
+            if(velnumber >= 8){
+                std::cout<<"landing"<<std::endl;
+                takeofforLanding.request.takeoffOrLanding = 2;
+                bool lan = takeoffOrLandingclient.call(takeofforLanding);
+                if(lan)
+                {
+                    ROS_INFO("landing success!!");
+                    ros::Duration(5).sleep();
+                }
+                else
+                {
+                    ROS_INFO("landing faied!!");
+                }
+            
+            }
+        }
+        else{
+            std::cout<<"work_mode error"<<std::endl;
         }
         
         ros::spinOnce();

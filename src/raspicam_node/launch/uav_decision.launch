@@ -3,7 +3,10 @@
     <!-- Start the uavdata server -->
     <node pkg="ttauav_node" type="uavdata" name="uavdata" />
     <node pkg="ttauav_node" type="service" name="service" output="screen" />
-    <node pkg="ttauav_node" type="uav_decision" name="uav_decision" output="screen" />
+    <node pkg="ttauav_node" type="uav_decision" name="uav_decision" output="screen">
+        <param name="vel_n" type="double" value="0.25" />
+        <param name="fly_time" type="double" value="20000" />
+    </node>
   
   
   </launch>

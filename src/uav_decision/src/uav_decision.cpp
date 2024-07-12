@@ -159,7 +159,6 @@ void UavDecision::Takeoffmode() {
 	flightbyVel.request.vel_e = 0;
 	flightbyVel.request.vel_d = 0.25;
 	flightbyVel.request.fly_time = 2000;
-	flightByVelclient_.call(flightbyVel);
 	bool ack1 = flightByVelclient_.call(flightbyVel);
 	if (ack1) {
 		ROS_INFO("move up success!!");
