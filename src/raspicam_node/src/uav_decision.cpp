@@ -164,8 +164,8 @@ int main(int argc, char** argv)
     nh.param<int>("work_mode", work_mode, 0);
     nh.param<double>("landing_threshold", landing_threshold, 0.05);
     nh.param<double>("track_threshold", track_threshold, 0.10);
-    nh.param<double>("vel_n",vel_n,0.0);
-    nh.param<double>("fly_time",fly_time,0.0);
+    nh.param<double>("/vel_n",vel_n,0.0);
+    nh.param<double>("/fly_time",fly_time,0.0);
     nh.param<int>("X_axis_offset", X_axis_offset, -15);
     nh.param<int>("Y_axis_offset", Y_axis_offset, 92);
 
@@ -256,7 +256,7 @@ int main(int argc, char** argv)
                 cap.release();
             cap_open_flag = false;
         }
-        
+
         if(work_mode == 1){
             takeofforLanding.request.takeoffOrLanding = 1;
             bool ack = takeoffOrLandingclient.call(takeofforLanding);
@@ -306,7 +306,7 @@ int main(int argc, char** argv)
             bool ack1 = flightByVelclient.call(flightbyVel);
             if (ack1) {
                 ROS_INFO("move to target success!!");
-                ros::Duration(3).sleep();
+                ros::Duration(20).sleep();
                 work_mode = 3;
             } else {
                 ROS_INFO("move to target failed!!");
@@ -339,7 +339,7 @@ int main(int argc, char** argv)
             bool ack = takeoffOrLandingclient.call(takeofforLanding);
             if (ack) {
                 ROS_INFO("takeoff success!!");
-                ros::Duration(6).sleep();
+                ros::Duration(3).sleep();
             } else {
                 ROS_INFO("takeoff faied!!");
             }
@@ -374,7 +374,7 @@ int main(int argc, char** argv)
             bool ack1 = flightByVelclient.call(flightbyVel);
             if (ack1) {
                 ROS_INFO("move back success!!");
-                ros::Duration(3).sleep();
+                ros::Duration(20).sleep();
                 work_mode = 6;
             } else {
                 ROS_INFO("move back failed!!");
