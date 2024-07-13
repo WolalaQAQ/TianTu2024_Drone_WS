@@ -325,6 +325,7 @@ int main(int argc, char** argv)
                     ROS_INFO("landing success!!");
                     ros::Duration(5).sleep();
                     work_mode = 4;
+                    velnumber = 0;
                 }
                 else
                 {
@@ -392,6 +393,7 @@ int main(int argc, char** argv)
                 {
                     ROS_INFO("landing success!!");
                     ros::Duration(5).sleep();
+                    velnumber = 0;
                 }
                 else
                 {
