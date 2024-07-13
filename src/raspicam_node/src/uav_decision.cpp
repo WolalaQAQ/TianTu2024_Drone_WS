@@ -164,8 +164,8 @@ int main(int argc, char** argv)
     nh.param<int>("work_mode", work_mode, 0);
     nh.param<double>("landing_threshold", landing_threshold, 0.05);
     nh.param<double>("track_threshold", track_threshold, 0.10);
-    nh.param<double>("/vel_n",vel_n,0.0);
-    nh.param<double>("/fly_time",fly_time,0.0);
+    nh.param<double>("/uav_decision/vel_n",vel_n,0.0);
+    nh.param<double>("/uav_decision/fly_time",fly_time,0.0);
     nh.param<int>("X_axis_offset", X_axis_offset, -15);
     nh.param<int>("Y_axis_offset", Y_axis_offset, 92);
 
