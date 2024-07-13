@@ -229,7 +229,8 @@ int main(int argc, char** argv)
                 last_time = current_time;
             
             }
-            if((work_mode == 2 || work_mode == 3) && (current_time - last_time >= 8)){
+            if((work_mode == 2 || work_mode == 3 || work_mode ==5 || work_mode ==6)
+                 && (current_time - last_time >= 8)){
                 cap.release();
                 cap.open(rtsp_url);
                 while (!cap.isOpened()) {
@@ -263,7 +264,7 @@ int main(int argc, char** argv)
 
             if (ack) {
                 ROS_INFO("takeoff success!!");
-                ros::Duration(6).sleep();
+                ros::Duration(4).sleep();
             } else {
                 ROS_INFO("takeoff faied!!");
             }
@@ -323,7 +324,7 @@ int main(int argc, char** argv)
                 if(lan)
                 {
                     ROS_INFO("landing success!!");
-                    ros::Duration(5).sleep();
+                    ros::Duration(9).sleep();
                     work_mode = 4;
                     velnumber = 0;
                 }
@@ -340,7 +341,7 @@ int main(int argc, char** argv)
             bool ack = takeoffOrLandingclient.call(takeofforLanding);
             if (ack) {
                 ROS_INFO("takeoff success!!");
-                ros::Duration(3).sleep();
+                ros::Duration(5).sleep();
             } else {
                 ROS_INFO("takeoff faied!!");
             }
