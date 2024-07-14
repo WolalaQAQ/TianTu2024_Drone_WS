@@ -134,7 +134,7 @@ void track(cv::Mat frame, int width, int height)
             }
         }
         
-        if(abs(velx) < 0.03 && abs(vely) < 0.03){
+        if(abs(velx) < 0.05 && abs(vely) < 0.05){
             std::cout<<velnumber<<std::endl;
             velnumber++;
         }
@@ -316,7 +316,7 @@ int main(int argc, char** argv)
                 bool ack1 = flightByVelclient.call(flightbyVel);
                 if (ack1) {
                     ROS_INFO("move to target success!!");
-                    ros::Duration((fly_time/1000)+2).sleep();
+                    ros::Duration((fly_time/1000)).sleep();
                     work_mode = 3;
                 } else {
                     ROS_INFO("move to target failed!!");
@@ -358,11 +358,20 @@ int main(int argc, char** argv)
                 bool tiaojian = gimbalControlclient.call(gimbalcontrol);
                 if (tiaojian) {
                     ROS_INFO("gimbalcontrol success!!!!!");
- 		    ros::Duration(5).sleep();
-		    work_mode = 5;
-
                 } else {
                     ROS_INFO("gimbalcontrol failed!!!!!!");
+                }
+                flightbyVel.request.vel_n = 0;
+                flightbyVel.request.vel_e = 0;
+                flightbyVel.request.vel_d = 0.25;
+                flightbyVel.request.fly_time = 2000;
+                bool ack1 = flightByVelclient.call(flightbyVel);
+                if (ack1) {
+                    ROS_INFO("move up success!!");
+                    ros::Duration(2).sleep();
+                    work_mode = 5;
+                } else {
+                    ROS_INFO("move up failed!!");
                 }
 
             }
@@ -374,7 +383,7 @@ int main(int argc, char** argv)
                 bool ack1 = flightByVelclient.call(flightbyVel);
                 if (ack1) {
                     ROS_INFO("move back success!!");
-                    ros::Duration((fly_time/1000)+2).sleep();
+                    ros::Duration((fly_time/1000)).sleep();
                     work_mode = 6;
                 } else {
                     ROS_INFO("move back failed!!");
