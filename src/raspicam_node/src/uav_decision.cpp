@@ -104,8 +104,8 @@ void track(cv::Mat frame, int width, int height)
         double err_y = height/2.0 + Y_axis_offset - center.y;
         ROS_INFO_STREAM("state="<<err_x<<" "<<err_y);
         //速度控制
-        float velx = 0.0009*err_y;
-        float vely = -0.0009*err_x;
+        float velx = 0.0007*err_y;
+        float vely = -0.0007*err_x;
         ROS_INFO_STREAM("statevelx="<<velx<<" "<<velx);
         double current_time = ros::Time::now().toSec();
         double time_elapsed = current_time - last_processed_time;
@@ -129,7 +129,7 @@ void track(cv::Mat frame, int width, int height)
             }
         }
         
-        if(abs(velx) < 0.05 && abs(vely) < 0.05){
+        if(abs(velx) < 0.02 && abs(vely) < 0.02){
             std::cout<<velnumber<<std::endl;
             velnumber++;
         }
