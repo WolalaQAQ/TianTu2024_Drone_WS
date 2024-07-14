@@ -285,12 +285,8 @@ int main(int argc, char** argv)
                 // 云台调整为朝向正下方
                 gimbalcontrol.request.pitch = -90;
                 bool tiaojian = gimbalControlclient.call(gimbalcontrol);
-                ros::Duration(1).sleep();
-                gimbalcontrol.request.pitch = -90;
-                tiaojian = gimbalControlclient.call(gimbalcontrol);
                 if (tiaojian) {
                     ROS_INFO("gimbalcontrol success!!!!!");
-                    ros::Duration(5).sleep();
                 } else {
                     ROS_INFO("gimbalcontrol failed!!!!!!");
                 }
@@ -304,7 +300,7 @@ int main(int argc, char** argv)
                 bool ack1 = flightByVelclient.call(flightbyVel);
                 if (ack1) {
                     ROS_INFO("move up success!!");
-                    ros::Duration(3).sleep();
+                    ros::Duration(2).sleep();
                     work_mode = 2;
                 } else {
                     ROS_INFO("move up failed!!");
