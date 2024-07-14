@@ -166,8 +166,8 @@ int main(int argc, char** argv)
     nh.param<double>("track_threshold", track_threshold, 0.10);
     nh.param<double>("/uav_decision/vel_n",vel_n,0.0);
     nh.param<double>("/uav_decision/fly_time",fly_time,0.0);
-    nh.param<int>("X_axis_offset", X_axis_offset, -10);
-    nh.param<int>("Y_axis_offset", Y_axis_offset, 92);
+    nh.param<int>("/uav_decision/X_axis_offset", X_axis_offset, -20);
+    nh.param<int>("/uav_decision/Y_axis_offset", Y_axis_offset, 92);
 
     std::cout<<"no_has_wifi:"<<no_has_wifi<<std::endl;
     std::cout<<"work_mode:"<<work_mode<<std::endl;
