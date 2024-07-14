@@ -104,8 +104,8 @@ void track(cv::Mat frame, int width, int height)
         double err_y = height/2.0 + Y_axis_offset - center.y;
         ROS_INFO_STREAM("state="<<err_x<<" "<<err_y);
         //速度控制
-        float velx = 0.0005*err_y;
-        float vely = -0.0005*err_x;
+        float velx = 0.0009*err_y;
+        float vely = -0.0009*err_x;
         ROS_INFO_STREAM("statevelx="<<velx<<" "<<velx);
         double current_time = ros::Time::now().toSec();
         double time_elapsed = current_time - last_processed_time;
@@ -166,7 +166,7 @@ int main(int argc, char** argv)
     nh.param<double>("track_threshold", track_threshold, 0.10);
     nh.param<double>("/uav_decision/vel_n",vel_n,0.0);
     nh.param<double>("/uav_decision/fly_time",fly_time,0.0);
-    nh.param<int>("X_axis_offset", X_axis_offset, -15);
+    nh.param<int>("X_axis_offset", X_axis_offset, -10);
     nh.param<int>("Y_axis_offset", Y_axis_offset, 92);
 
     std::cout<<"no_has_wifi:"<<no_has_wifi<<std::endl;
@@ -307,7 +307,7 @@ int main(int argc, char** argv)
             bool ack1 = flightByVelclient.call(flightbyVel);
             if (ack1) {
                 ROS_INFO("move to target success!!");
-                ros::Duration(20).sleep();
+                ros::Duration((fly_time/1000)+2).sleep();
                 work_mode = 3;
             } else {
                 ROS_INFO("move to target failed!!");
@@ -372,11 +372,10 @@ int main(int argc, char** argv)
             flightbyVel.request.vel_e = 0;
             flightbyVel.request.vel_d = 0;
             flightbyVel.request.fly_time = fly_time;
-            flightByVelclient.call(flightbyVel);
             bool ack1 = flightByVelclient.call(flightbyVel);
             if (ack1) {
                 ROS_INFO("move back success!!");
-                ros::Duration(20).sleep();
+                ros::Duration((fly_time/1000)+2).sleep();
                 work_mode = 6;
             } else {
                 ROS_INFO("move back failed!!");
