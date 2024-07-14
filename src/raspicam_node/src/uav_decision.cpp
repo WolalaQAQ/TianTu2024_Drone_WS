@@ -114,7 +114,7 @@ void track(cv::Mat frame, int width, int height)
         ROS_INFO_STREAM("statevelx="<<velx<<" "<<velx);
         double current_time = ros::Time::now().toSec();
         double time_elapsed = current_time - last_processed_time;
-        if(time_elapsed > 6){
+        if(time_elapsed > 3){
             last_processed_time = current_time;
             
             flightbyVel.request.vel_n = velx;
