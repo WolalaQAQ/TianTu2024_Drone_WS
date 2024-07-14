@@ -114,7 +114,7 @@ void track(cv::Mat frame, int width, int height)
         ROS_INFO_STREAM("statevelx="<<velx<<" "<<velx);
         double current_time = ros::Time::now().toSec();
         double time_elapsed = current_time - last_processed_time;
-        if(time_elapsed > 3){
+        if(time_elapsed > 4){
             last_processed_time = current_time;
             
             flightbyVel.request.vel_n = velx;
@@ -134,7 +134,7 @@ void track(cv::Mat frame, int width, int height)
             }
         }
         
-        if(abs(velx) < 0.02 && abs(vely) < 0.02){
+        if(abs(velx) < 0.03 && abs(vely) < 0.03){
             std::cout<<velnumber<<std::endl;
             velnumber++;
         }
