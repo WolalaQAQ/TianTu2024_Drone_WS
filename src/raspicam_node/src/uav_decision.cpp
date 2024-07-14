@@ -356,23 +356,13 @@ int main(int argc, char** argv)
                 }
                 gimbalcontrol.request.pitch = -90;
                 bool tiaojian = gimbalControlclient.call(gimbalcontrol);
-                ros::Duration(1).sleep();
                 if (tiaojian) {
                     ROS_INFO("gimbalcontrol success!!!!!");
+ 		    ros::Duration(5).sleep();
+		    work_mode = 5;
+
                 } else {
                     ROS_INFO("gimbalcontrol failed!!!!!!");
-                }
-                flightbyVel.request.vel_n = 0;
-                flightbyVel.request.vel_e = 0;
-                flightbyVel.request.vel_d = 0.25;
-                flightbyVel.request.fly_time = 2000;
-                bool ack1 = flightByVelclient.call(flightbyVel);
-                if (ack1) {
-                    ROS_INFO("move up success!!");
-                    ros::Duration(3).sleep();
-                    work_mode = 5;
-                } else {
-                    ROS_INFO("move up failed!!");
                 }
 
             }
