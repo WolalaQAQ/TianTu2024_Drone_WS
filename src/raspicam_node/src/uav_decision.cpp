@@ -170,7 +170,7 @@ int main(int argc, char** argv)
     flightByVelclient = nh.serviceClient<ttauav_node::flightByVel>("flightByVel");
     gimbalControlclient = nh.serviceClient<ttauav_node::gimbalControl>("gimbalControl");
     takeoffOrLandingclient= nh.serviceClient<ttauav_node::takeoffOrLanding>("takeoffOrLanding");
-    
+    chargeClient_ = nh.serviceClient<std_srvs::SetBool>("charge_decision");
     start_service_ = nh.advertiseService("start_processing", startCallback);
     
     nh.param<bool>("no_has_wifi", no_has_wifi, false);
