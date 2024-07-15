@@ -110,8 +110,8 @@ void track(cv::Mat frame, int width, int height)
         double err_y = height/2.0 + Y_axis_offset - center.y;
         ROS_INFO_STREAM("state="<<err_x<<" "<<err_y);
         //速度控制
-        float velx = 0.0007*err_y;
-        float vely = -0.0007*err_x;
+        float velx = 0.0009*err_y;
+        float vely = -0.0009*err_x;
         ROS_INFO_STREAM("statevelx="<<velx<<" "<<velx);
         double current_time = ros::Time::now().toSec();
         double time_elapsed = current_time - last_processed_time;
@@ -298,7 +298,7 @@ int main(int argc, char** argv)
                 flightbyVel.request.vel_n = 0;
                 flightbyVel.request.vel_e = 0;
                 flightbyVel.request.vel_d = 0.25;
-                flightbyVel.request.fly_time = 2000;
+                flightbyVel.request.fly_time = 2800;
                 bool ack1 = flightByVelclient.call(flightbyVel);
                 if (ack1) {
                     ROS_INFO("move up success!!");
@@ -367,7 +367,7 @@ int main(int argc, char** argv)
                 flightbyVel.request.vel_n = 0;
                 flightbyVel.request.vel_e = 0;
                 flightbyVel.request.vel_d = 0.25;
-                flightbyVel.request.fly_time = 1800;
+                flightbyVel.request.fly_time = 2800;
                 bool ack1 = flightByVelclient.call(flightbyVel);
                 if (ack1) {
                     ROS_INFO("move up success!!");
