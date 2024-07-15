@@ -221,6 +221,7 @@ int main(int argc, char** argv)
                 cap.read(frame);
                 if (frame.empty()){
                     ROS_WARN("Frame is empty");
+                    cap_open_flag = false;
                     continue;
                 }
                 static double last_time = ros::Time::now().toSec();
