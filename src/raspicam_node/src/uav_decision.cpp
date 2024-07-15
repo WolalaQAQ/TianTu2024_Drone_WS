@@ -7,6 +7,7 @@ int velnumber = 0;
 ros::ServiceClient flightByVelclient;
 ros::ServiceClient gimbalControlclient;
 ros::ServiceClient takeoffOrLandingclient;  
+ros::ServiceClient chargeClient_;
 ros::ServiceServer start_service_; 
 
 ttauav_node::flightByVel flightbyVel;
@@ -169,6 +170,7 @@ int main(int argc, char** argv)
     flightByVelclient = nh.serviceClient<ttauav_node::flightByVel>("flightByVel");
     gimbalControlclient = nh.serviceClient<ttauav_node::gimbalControl>("gimbalControl");
     takeoffOrLandingclient= nh.serviceClient<ttauav_node::takeoffOrLanding>("takeoffOrLanding");
+    
     start_service_ = nh.advertiseService("start_processing", startCallback);
     
     nh.param<bool>("no_has_wifi", no_has_wifi, false);
@@ -301,6 +303,14 @@ int main(int argc, char** argv)
                     ROS_INFO("move up success!!");
                     ros::Duration(3).sleep();
                     work_mode = 2;
+                    // 向设备A发送服务消息
+                    std_srvs::SetBool srv;
+                    srv.request.data = true;
+                    if (chargeClient_.call(srv)) {
+                        ROS_INFO("Charge notification sent successfully");
+                    } else {
+                        ROS_ERROR("Failed to send charge notification");
+                    }
                 } else {
                     ROS_INFO("move up failed!!");
                 }
