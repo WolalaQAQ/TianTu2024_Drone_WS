@@ -367,7 +367,7 @@ int main(int argc, char** argv)
                 flightbyVel.request.vel_n = 0;
                 flightbyVel.request.vel_e = 0;
                 flightbyVel.request.vel_d = 0.25;
-                flightbyVel.request.fly_time = 1500;
+                flightbyVel.request.fly_time = 1800;
                 bool ack1 = flightByVelclient.call(flightbyVel);
                 if (ack1) {
                     ROS_INFO("move up success!!");
