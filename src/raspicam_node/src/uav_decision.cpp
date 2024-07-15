@@ -134,7 +134,7 @@ void track(cv::Mat frame, int width, int height)
             }
         }
         
-        if(abs(velx) < 0.05 && abs(vely) < 0.05){
+        if(abs(velx) < 0.03 && abs(vely) < 0.03){
             std::cout<<velnumber<<std::endl;
             velnumber++;
         }
@@ -296,11 +296,10 @@ int main(int argc, char** argv)
                 flightbyVel.request.vel_e = 0;
                 flightbyVel.request.vel_d = 0.25;
                 flightbyVel.request.fly_time = 2000;
-                flightByVelclient.call(flightbyVel);
                 bool ack1 = flightByVelclient.call(flightbyVel);
                 if (ack1) {
                     ROS_INFO("move up success!!");
-                    ros::Duration(2).sleep();
+                    ros::Duration(3).sleep();
                     work_mode = 2;
                 } else {
                     ROS_INFO("move up failed!!");
@@ -364,7 +363,7 @@ int main(int argc, char** argv)
                 flightbyVel.request.vel_n = 0;
                 flightbyVel.request.vel_e = 0;
                 flightbyVel.request.vel_d = 0.25;
-                flightbyVel.request.fly_time = 2000;
+                flightbyVel.request.fly_time = 1500;
                 bool ack1 = flightByVelclient.call(flightbyVel);
                 if (ack1) {
                     ROS_INFO("move up success!!");
