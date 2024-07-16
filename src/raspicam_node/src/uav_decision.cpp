@@ -115,7 +115,7 @@ void track(cv::Mat frame, int width, int height)
         ROS_INFO_STREAM("statevelx="<<velx<<" "<<velx);
         double current_time = ros::Time::now().toSec();
         double time_elapsed = current_time - last_processed_time;
-        if(time_elapsed > 4){
+        if(time_elapsed > 6){
             last_processed_time = current_time;
             
             flightbyVel.request.vel_n = velx;
@@ -288,6 +288,7 @@ int main(int argc, char** argv)
                 // 云台调整为朝向正下方
                 gimbalcontrol.request.pitch = -90;
                 bool tiaojian = gimbalControlclient.call(gimbalcontrol);
+                ros::Duration(2).sleep();
                 if (tiaojian) {
                     ROS_INFO("gimbalcontrol success!!!!!");
                 } else {
