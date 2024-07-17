@@ -122,7 +122,7 @@ void track(const cv::Mat &frame, int width, int height)
             flightbyVel.request.vel_n = velx;
             flightbyVel.request.vel_e = vely;
             flightbyVel.request.vel_d = 0;
-            flightbyVel.request.fly_time = 300;
+            flightbyVel.request.fly_time = 150;
             bool ackvel =flightByVelclient.call(flightbyVel);
             if(ackvel)
             {
