@@ -110,8 +110,8 @@ void track(const cv::Mat &frame, int width, int height)
         double err_y = height/2.0 + Y_axis_offset - center.y;
         ROS_INFO_STREAM("state="<<err_x<<" "<<err_y);
         //速度控制
-        float velx = 0.0009*err_y;
-        float vely = -0.0009*err_x;
+        float velx = 0.0015*err_y;
+        float vely = -0.0015*err_x;
         ROS_INFO_STREAM("statevelx="<<velx<<" "<<velx);
         double current_time = ros::Time::now().toSec();
         double time_elapsed = current_time - last_processed_time;
@@ -281,7 +281,7 @@ int main(int argc, char** argv)
 
                 if (ack) {
                     ROS_INFO("takeoff success!!");
-                    ros::Duration(4).sleep();
+                    ros::Duration(3).sleep();
                 } else {
                     ROS_INFO("takeoff faied!!");
                 }
@@ -289,7 +289,7 @@ int main(int argc, char** argv)
                 // 云台调整为朝向正下方
                 gimbalcontrol.request.pitch = -90;
                 bool tiaojian = gimbalControlclient.call(gimbalcontrol);
-                ros::Duration(1).sleep();
+                ros::Duration(2).sleep();
                 if (tiaojian) {
                     ROS_INFO("gimbalcontrol success!!!!!");
                 } else {
