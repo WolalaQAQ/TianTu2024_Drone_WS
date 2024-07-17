@@ -23,6 +23,8 @@ bool no_has_wifi;
 bool first_flag = true;
 double vel_n;
 double fly_time;
+double Time_delay;
+int track_time;
 
 bool start_processing = false;
 
@@ -122,7 +124,7 @@ void track(const cv::Mat &frame, int width, int height)
             flightbyVel.request.vel_n = velx;
             flightbyVel.request.vel_e = vely;
             flightbyVel.request.vel_d = 0;
-            flightbyVel.request.fly_time = 150;
+            flightbyVel.request.fly_time = track_time;
             bool ackvel =flightByVelclient.call(flightbyVel);
             if(ackvel)
             {
@@ -184,6 +186,8 @@ int main(int argc, char** argv)
     nh.param<int>("/uav_decision/X_axis_offset", X_axis_offset, -20);
     nh.param<int>("/uav_decision/Y_axis_offset", Y_axis_offset, 92);
     nh.param<double>("/uav_decision/Kp", Kp, 0.0015);
+    nh.param<double>("/uav_decision/Time_delay", Time_delay, 6);
+    nh.param<double>("/uav_decision/track_time", track_time, 150);
 
     std::cout<<"no_has_wifi:"<<no_has_wifi<<std::endl;
     std::cout<<"work_mode:"<<work_mode<<std::endl;
