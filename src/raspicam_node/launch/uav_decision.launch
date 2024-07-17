@@ -8,10 +8,10 @@
         <param name="/fly_time" type="double" value="1410.6" />
         <param name="X_axis_offset" type="int" value="1" />
         <param name="Y_axis_offset" type="int" value="97" />
-        <param name="/track_threshold" type="double" value="0.02" />
-        <param name="/Kp" type="double" value="0.0015" />
+        <param name="/track_threshold" type="double" value="0.04" />
+        <param name="/Kp" type="double" value="0.0010" />
         <param name="/Time_delay" type="double" value="6" />
-        <param name="/track_time" type="int" value="150" />
+        <param name="/track_time" type="int" value="120" />
     </node>
   
   
