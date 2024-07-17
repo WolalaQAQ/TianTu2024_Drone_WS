@@ -16,6 +16,7 @@ ttauav_node::gimbalControl gimbalcontrol;
 
 double landing_threshold;
 double track_threshold;
+double Kp;
 int X_axis_offset;
 int Y_axis_offset;
 bool no_has_wifi;
@@ -182,6 +183,7 @@ int main(int argc, char** argv)
     nh.param<double>("/uav_decision/fly_time",fly_time,0.0);
     nh.param<int>("/uav_decision/X_axis_offset", X_axis_offset, -20);
     nh.param<int>("/uav_decision/Y_axis_offset", Y_axis_offset, 92);
+    nh.param<double>("/uav_decision/Kp", Kp, 0.0015);
 
     std::cout<<"no_has_wifi:"<<no_has_wifi<<std::endl;
     std::cout<<"work_mode:"<<work_mode<<std::endl;
