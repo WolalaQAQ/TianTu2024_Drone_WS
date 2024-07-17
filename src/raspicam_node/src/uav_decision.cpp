@@ -187,7 +187,7 @@ int main(int argc, char** argv)
     nh.param<int>("/uav_decision/Y_axis_offset", Y_axis_offset, 92);
     nh.param<double>("/uav_decision/Kp", Kp, 0.0015);
     nh.param<double>("/uav_decision/Time_delay", Time_delay, 6);
-    nh.param<double>("/uav_decision/track_time", track_time, 150);
+    nh.param<int>("/uav_decision/track_time", track_time, 150);
 
     std::cout<<"no_has_wifi:"<<no_has_wifi<<std::endl;
     std::cout<<"work_mode:"<<work_mode<<std::endl;
