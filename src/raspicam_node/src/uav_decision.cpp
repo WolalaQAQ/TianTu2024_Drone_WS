@@ -30,7 +30,7 @@ struct Center {
     double x;
     double y;
 };
-void track(cv::Mat frame, int width, int height)
+void track(const cv::Mat &frame, int width, int height)
 {   
     cv::Mat img;
     cv::cvtColor(frame, img, cv::COLOR_RGB2GRAY); // 将输入图像转换为灰度图像
@@ -115,7 +115,7 @@ void track(cv::Mat frame, int width, int height)
         ROS_INFO_STREAM("statevelx="<<velx<<" "<<velx);
         double current_time = ros::Time::now().toSec();
         double time_elapsed = current_time - last_processed_time;
-        if(time_elapsed > 6){
+        if(time_elapsed > 4){
             last_processed_time = current_time;
             
             flightbyVel.request.vel_n = velx;
@@ -135,7 +135,7 @@ void track(cv::Mat frame, int width, int height)
             }
         }
         
-        if(abs(velx) < 0.03 && abs(vely) < 0.03){
+        if(abs(velx) < 0.02 && abs(vely) < 0.02){
             std::cout<<velnumber<<std::endl;
             velnumber++;
         }
@@ -157,11 +157,11 @@ int main(int argc, char** argv)
 {
     std::string rtsp_url = "rtsp://127.0.0.1:8554/live";
     cv::VideoCapture cap(rtsp_url);
-    // if (!cap.isOpened())
-    // {
-    //     ROS_ERROR("Failed to open RTSP stream");
-    //     return -1;
-    // }
+    if (!cap.isOpened())
+    {
+        ROS_ERROR("Failed to open RTSP stream");
+        return -1;
+    }
 
     ros::init(argc, argv, "qr_code_reader");
     ros::NodeHandle nh;
@@ -288,7 +288,7 @@ int main(int argc, char** argv)
                 // 云台调整为朝向正下方
                 gimbalcontrol.request.pitch = -90;
                 bool tiaojian = gimbalControlclient.call(gimbalcontrol);
-                ros::Duration(2).sleep();
+                ros::Duration(1).sleep();
                 if (tiaojian) {
                     ROS_INFO("gimbalcontrol success!!!!!");
                 } else {
@@ -327,7 +327,7 @@ int main(int argc, char** argv)
                 }
             }
             else if(work_mode == 3){   
-                cv::Mat img(frame.rows, frame.cols, CV_8UC3, frame.data);
+                cv::Mat img = frame.clone();
                 std::cout<<"track work"<<std::endl;
                 track(img, frame.cols, frame.rows); // 寻找矩形
                 if(velnumber >= 8){
@@ -362,6 +362,7 @@ int main(int argc, char** argv)
                 bool tiaojian = gimbalControlclient.call(gimbalcontrol);
                 if (tiaojian) {
                     ROS_INFO("gimbalcontrol success!!!!!");
+                    ros::Duration(1).sleep();
                 } else {
                     ROS_INFO("gimbalcontrol failed!!!!!!");
                 }
@@ -402,7 +403,7 @@ int main(int argc, char** argv)
                 }
             }
             else if(work_mode == 6){
-                cv::Mat img(frame.rows, frame.cols, CV_8UC3, frame.data);
+                cv::Mat img = frame.clone();
                 std::cout<<"track work"<<std::endl;
                 track(img, frame.cols, frame.rows); // 寻找矩形
                 if(velnumber >= 8){
