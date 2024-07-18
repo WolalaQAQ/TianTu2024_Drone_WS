@@ -1,9 +1,0 @@
-<launch>
-    <node name="uav_cam_node" pkg="uav_cam" type="uav_cam_node" output="screen">
-        <param name="rtsp_url" value="rtsp://127.0.0.1:8554/live" />
-        <param name="camera_matrix/data" value="[1000.0, 0.0, 640.0, 0.0, 1000.0, 360.0, 0.0, 0.0, 1.0]" />
-        <param name="distortion_coefficients/data" value="[0.1, -0.2, 0.0, 0.0, 0.0]" />
-        <param name="rectification_matrix/data" value="[1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]" />
-        <param name="projection_matrix/data" value="[1000.0, 0.0, 640.0, 0.0, 0.0, 1000.0, 360.0, 0.0, 0.0, 0.0, 1.0, 0.0]" />
-    </node>
-</launch>
