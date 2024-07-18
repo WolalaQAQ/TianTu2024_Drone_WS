@@ -215,13 +215,9 @@ int main(int argc, char** argv)
                     while (!cap.isOpened()) {
                     // 处理视频流打开失败的情况
                     cap.open(rtsp_url);
-                    if (cap.isOpened()) {
-                        break; // 视频流成功打开，跳出循环
-                    }
-                    // 处理视频流打开失败的情况
-                    // 可以进行一些等待操作，或者重试间隔
-                    // 例如：
-                    // r.sleep();
+                        if (cap.isOpened()) {
+                            break; // 视频流成功打开，跳出循环
+                        }
                     }
                     cap_open_flag=true;
                 }
@@ -234,7 +230,7 @@ int main(int argc, char** argv)
                 }
                 static double last_time = ros::Time::now().toSec();
                 double current_time = ros::Time::now().toSec();
-                if((current_time - last_time >= 5)){
+                if((current_time - last_time >= 3)){
                     cap.release();
                     cap.open(rtsp_url);
 
@@ -254,7 +250,7 @@ int main(int argc, char** argv)
                 
                 }
                 if((work_mode == 2 || work_mode == 3 || work_mode ==5 || work_mode ==6)
-                    && (current_time - last_time >= 8)){
+                    && (current_time - last_time >= 3)){
                     cap.release();
                     cap.open(rtsp_url);
                     while (!cap.isOpened()) {
