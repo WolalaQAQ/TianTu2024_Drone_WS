@@ -36,6 +36,8 @@ struct Center {
 void track(const cv::Mat &frame, int width, int height)
 {   
     cv::Mat img;
+    static auto count = 0;
+    cv::imwrite("/root/TianTu2024_Drone_WS/image" + std::to_string(count++), frame);
     cv::cvtColor(frame, img, cv::COLOR_RGB2GRAY); // 将输入图像转换为灰度图像
     cv::threshold(img, img, 127, 255, cv::THRESH_BINARY); // 将图像转换为二值图像
 
