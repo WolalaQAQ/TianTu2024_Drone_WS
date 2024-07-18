@@ -265,7 +265,7 @@ int main(int argc, char** argv)
                         // 处理视频流打开失败的情况
                         // 可以进行一些等待操作，或者重试间隔
                         // 例如：
-                        // r.sleep();
+                        r.sleep();
                     }
                     last_time = current_time;
                 
@@ -305,6 +305,7 @@ int main(int argc, char** argv)
                 flightbyVel.request.vel_e = 0;
                 flightbyVel.request.vel_d = 0.25;
                 flightbyVel.request.fly_time = 2800;
+                ros::Duration(1).sleep();
                 bool ack1 = flightByVelclient.call(flightbyVel);
                 if (ack1) {
                     ROS_INFO("move up success!!");
@@ -398,6 +399,7 @@ int main(int argc, char** argv)
                 flightbyVel.request.vel_e = 0;
                 flightbyVel.request.vel_d = 0;
                 flightbyVel.request.fly_time = fly_time;
+                ros::Duration(1).sleep();
                 bool ack1 = flightByVelclient.call(flightbyVel);
                 if (ack1) {
                     ROS_INFO("move back success!!");
