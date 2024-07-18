@@ -231,27 +231,27 @@ int main(int argc, char** argv)
                     cap_open_flag = false;
                     continue;
                 }
-                static double last_time = ros::Time::now().toSec();
-                double current_time = ros::Time::now().toSec();
-                if((current_time - last_time >= 5)){
-                    cap.release();
-                    cap.open(rtsp_url);
+                // static double last_time = ros::Time::now().toSec();
+                // double current_time = ros::Time::now().toSec();
+                // if((current_time - last_time >= 5)){
+                //     cap.release();
+                //     cap.open(rtsp_url);
 
-                    while (!cap.isOpened()) {
-                        // 处理视频流打开失败的情况
-                        cap.open(rtsp_url);
-                        if (cap.isOpened()) {
-                            break; // 视频流成功打开，跳出循环
-                        }
+                //     while (!cap.isOpened()) {
+                //         // 处理视频流打开失败的情况
+                //         cap.open(rtsp_url);
+                //         if (cap.isOpened()) {
+                //             break; // 视频流成功打开，跳出循环
+                //         }
 
-                        // 处理视频流打开失败的情况
-                        // 可以进行一些等待操作，或者重试间隔
-                        // 例如：
-                        // r.sleep();
-                    }
-                    last_time = current_time;
+                //         // 处理视频流打开失败的情况
+                //         // 可以进行一些等待操作，或者重试间隔
+                //         // 例如：
+                //         // r.sleep();
+                //     }
+                //     last_time = current_time;
                 
-                }
+                // }
                 // if((work_mode == 2 || work_mode == 3 || work_mode ==5 || work_mode ==6)
                 //     && (current_time - last_time >= 8)){
                 //     cap.release();
