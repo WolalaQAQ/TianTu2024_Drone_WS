@@ -33,7 +33,7 @@ struct Center {
     double x;
     double y;
 };
-void track(const cv::Mat &frame, int width, int height)
+void track(const cv::Mat &frame, int width, int height,int work_mode)
 {
 	static auto count = 0;
 	cv::imwrite("/root/TianTu2024_Drone_WS/image/" + std::to_string(count++) + ".jpg", frame);
@@ -139,7 +139,9 @@ void track(const cv::Mat &frame, int width, int height)
                 return;
             }
         }
-        
+        if(work_mode==6){
+            track_threshold+=0.01;
+        }
         if(abs(velx) < track_threshold 
             && abs(vely) < track_threshold){
             std::cout<<velnumber<<std::endl;
@@ -347,7 +349,7 @@ int main(int argc, char** argv)
             else if(work_mode == 3){   
                 cv::Mat img = frame.clone();
                 std::cout<<"track work"<<std::endl;
-                track(img, frame.cols, frame.rows); // 寻找矩形
+                track(img, frame.cols, frame.rows,work_mode); // 寻找矩形
                 if(velnumber >= 8){
                     std::cout<<"landing"<<std::endl;
                     takeofforLanding.request.takeoffOrLanding = 2;
@@ -447,7 +449,7 @@ int main(int argc, char** argv)
             else if(work_mode == 6){
                 cv::Mat img = frame.clone();
                 std::cout<<"track work"<<std::endl;
-                track(img, frame.cols, frame.rows); // 寻找矩形
+                track(img, frame.cols, frame.rows,work_mode); // 寻找矩形
                 if(velnumber >= 8){
                     std::cout<<"landing"<<std::endl;
                     takeofforLanding.request.takeoffOrLanding = 2;
