@@ -316,6 +316,16 @@ int main(int argc, char** argv)
 
                 } else {
                     ROS_INFO("move up failed!!");
+                    while(!ack1){
+                        ack1 = flightByVelclient.call(flightbyVel);
+                        if (ack1) {
+                            ROS_INFO("move up success!!");
+                            ros::Duration(3).sleep();
+                            work_mode = 2;
+                        } else {
+                            ROS_INFO("move up failed!!");
+                        }
+                    }
                 }
 
             }
@@ -352,7 +362,20 @@ int main(int argc, char** argv)
                     else
                     {
                         ROS_INFO("landing faied!!");
-                        return 0;
+                        while(!lan){
+                            lan = takeoffOrLandingclient.call(takeofforLanding);
+                            if(lan)
+                            {
+                                ROS_INFO("landing success!!");
+                                ros::Duration(9).sleep();
+                                work_mode = 4;
+                                velnumber = 0;
+                            }
+                            else
+                            {
+                                ROS_INFO("landing faied!!");
+                            }
+                        }
                     }
                 
                 }
@@ -409,6 +432,16 @@ int main(int argc, char** argv)
                     work_mode = 6;
                 } else {
                     ROS_INFO("move back failed!!");
+                    while(!ack1){
+                        ack1 = flightByVelclient.call(flightbyVel);
+                        if (ack1) {
+                            ROS_INFO("move back success!!");
+                            ros::Duration((fly_time/1000)).sleep();
+                            work_mode = 6;
+                        } else {
+                            ROS_INFO("move back failed!!");
+                        }
+                    }
                 }
             }
             else if(work_mode == 6){
@@ -428,6 +461,19 @@ int main(int argc, char** argv)
                     else
                     {
                         ROS_INFO("landing faied!!");
+                        while(!lan){
+                            lan = takeoffOrLandingclient.call(takeofforLanding);
+                            if(lan)
+                            {
+                                ROS_INFO("landing success!!");
+                                ros::Duration(5).sleep();
+                                velnumber = 0;
+                            }
+                            else
+                            {
+                                ROS_INFO("landing faied!!");
+                            
+                        }
                     }
                 
                 }
