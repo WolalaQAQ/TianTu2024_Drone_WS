@@ -252,7 +252,7 @@ int main(int argc, char** argv)
                     last_time = current_time;
                 
                 }
-                if(( work_mode == 3 || work_mode ==6)
+                if((work_mode == 2|| work_mode == 3 || work_mode ==5 || work_mode ==6)
                     && (current_time - last_time >= 8)){
                     ROS_INFO("222current_time - last_time >= 3");
                     cap.release();
