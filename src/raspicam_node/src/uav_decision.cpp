@@ -140,7 +140,7 @@ void track(const cv::Mat &frame, int width, int height,int work_mode)
             }
         }
         if(work_mode==6){
-            track_threshold+=0.01;
+            track_threshold = landing_threshold;
         }
         if(abs(velx) < track_threshold 
             && abs(vely) < track_threshold){
@@ -183,7 +183,7 @@ int main(int argc, char** argv)
     
     nh.param<bool>("no_has_wifi", no_has_wifi, false);
     nh.param<int>("work_mode", work_mode, 0);
-    nh.param<double>("landing_threshold", landing_threshold, 0.05);
+    nh.param<double>("/uav_decision/landing_threshold", landing_threshold, 0.05);
     nh.param<double>("/uav_decision/track_threshold", track_threshold, 0.02);
     nh.param<double>("/uav_decision/vel_n",vel_n,0.0);
     nh.param<double>("/uav_decision/fly_time",fly_time,0.0);

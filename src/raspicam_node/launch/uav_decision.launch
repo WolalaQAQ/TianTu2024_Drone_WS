@@ -12,6 +12,7 @@
         <param name="/Kp" type="double" value="0.0012" />
         <param name="/Time_delay" type="double" value="8" />
         <param name="/track_time" type="int" value="120" />
+        <param name="/landing_threshold" type="double" value="0.05" />
     </node>
   
   
