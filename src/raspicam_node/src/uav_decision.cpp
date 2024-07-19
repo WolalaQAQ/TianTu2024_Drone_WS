@@ -472,6 +472,7 @@ int main(int argc, char** argv)
                             else
                             {
                                 ROS_INFO("landing faied!!");
+                            }
                             
                         }
                     }
