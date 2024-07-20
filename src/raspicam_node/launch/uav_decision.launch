@@ -13,6 +13,7 @@
         <param name="/Time_delay" type="double" value="8" />
         <param name="/track_time" type="int" value="120" />
         <param name="/landing_threshold" type="double" value="0.05" />
+        <param name="/back_extra_time" type="double" value="10" />
     </node>
   
   

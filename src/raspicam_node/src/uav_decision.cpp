@@ -26,6 +26,7 @@ double fly_time;
 double Time_delay;
 int track_time;
 bool track_time_out = false;
+double back_extra_time;
 
 bool start_processing = false;
 
@@ -193,6 +194,7 @@ int main(int argc, char** argv)
     nh.param<double>("/uav_decision/Kp", Kp, 0.0015);
     nh.param<double>("/uav_decision/Time_delay", Time_delay, 6);
     nh.param<int>("/uav_decision/track_time", track_time, 150);
+    nh.param<double>("/uav_decision/back_extra_time", back_extra_time, 10);
 
     std::cout<<"no_has_wifi:"<<no_has_wifi<<std::endl;
     std::cout<<"work_mode:"<<work_mode<<std::endl;
@@ -439,7 +441,7 @@ int main(int argc, char** argv)
                 bool ack1 = flightByVelclient.call(flightbyVel);
                 if (ack1) {
                     ROS_INFO("move back success!!");
-                    ros::Duration((fly_time/1000)).sleep();
+                    ros::Duration((fly_time/1000)+back_extra_time).sleep();
                     work_mode = 6;
                 } else {
                     ROS_INFO("move back failed!!");
@@ -447,7 +449,7 @@ int main(int argc, char** argv)
                         ack1 = flightByVelclient.call(flightbyVel);
                         if (ack1) {
                             ROS_INFO("move back success!!");
-                            ros::Duration((fly_time/1000)).sleep();
+                            ros::Duration((fly_time/1000)+back_extra_time).sleep();
                             work_mode = 6;
                         } else {
                             ROS_INFO("move back failed!!");
