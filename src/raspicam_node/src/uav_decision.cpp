@@ -36,8 +36,8 @@ struct Center {
 };
 void track(const cv::Mat &frame, int width, int height,int work_mode)
 {
-	static auto count = 0;
-	cv::imwrite("/root/TianTu2024_Drone_WS/image/" + std::to_string(count++) + ".jpg", frame);
+	// static auto count = 0;
+	// cv::imwrite("/root/TianTu2024_Drone_WS/image/" + std::to_string(count++) + ".jpg", frame);
     cv::Mat img;
     cv::cvtColor(frame, img, cv::COLOR_RGB2GRAY); // 将输入图像转换为灰度图像
     cv::threshold(img, img, 127, 255, cv::THRESH_BINARY); // 将图像转换为二值图像
@@ -354,7 +354,7 @@ int main(int argc, char** argv)
                 double current_time = ros::Time::now().toSec();
                 if((current_time - last_time) >= 120){
                     ROS_INFO("current_time - last_time >= 120");
-                    work_mode = 4;
+                    work_mode = 5;
                     velnumber = 0;
                     track_time_out = true;
                 }
