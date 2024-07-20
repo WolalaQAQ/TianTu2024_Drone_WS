@@ -25,6 +25,7 @@ double vel_n;
 double fly_time;
 double Time_delay;
 int track_time;
+bool track_time_out = false;
 
 bool start_processing = false;
 
@@ -349,6 +350,14 @@ int main(int argc, char** argv)
             else if(work_mode == 3){   
                 cv::Mat img = frame.clone();
                 std::cout<<"track work"<<std::endl;
+                static double last_time = ros::Time::now().toSec();
+                double current_time = ros::Time::now().toSec();
+                if((current_time - last_time) >= 120){
+                    ROS_INFO("current_time - last_time >= 120");
+                    work_mode = 4;
+                    velnumber = 0;
+                    track_time_out = true;
+                }
                 track(img, frame.cols, frame.rows,work_mode); // 寻找矩形
                 if(velnumber >= 8){
                     std::cout<<"landing"<<std::endl;
@@ -450,6 +459,33 @@ int main(int argc, char** argv)
                 cv::Mat img = frame.clone();
                 std::cout<<"track work"<<std::endl;
                 track(img, frame.cols, frame.rows,work_mode); // 寻找矩形
+                if(track_time_out){
+                    takeofforLanding.request.takeoffOrLanding = 2;
+                    bool lan = takeoffOrLandingclient.call(takeofforLanding);
+                    if(lan)
+                    {
+                        ROS_INFO("landing success!!");
+                        ros::Duration(5).sleep();
+                        velnumber = 0;
+                    }
+                    else
+                    {
+                        ROS_INFO("landing faied!!");
+                        while(!lan){
+                            lan = takeoffOrLandingclient.call(takeofforLanding);
+                            if(lan)
+                            {
+                                ROS_INFO("landing success!!");
+                                ros::Duration(5).sleep();
+                                velnumber = 0;
+                            }
+                            else
+                            {
+                                ROS_INFO("landing faied!!");
+                            }
+                        }
+                    }
+                }
                 if(velnumber >= 8){
                     std::cout<<"landing"<<std::endl;
                     takeofforLanding.request.takeoffOrLanding = 2;
