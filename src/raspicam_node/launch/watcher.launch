@@ -1,0 +1,12 @@
+<launch>
+
+    <!-- Start the uavdata server -->
+    <node pkg="ttauav_node" type="uavdata" name="uavdata" />
+    <node pkg="ttauav_node" type="service" name="service" output="screen" />
+    <node pkg="ttauav_node" type="watcher" name="watcher" output="screen">
+
+    </node>
+  
+  
+  </launch>
+  

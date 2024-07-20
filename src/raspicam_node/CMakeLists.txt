@@ -161,6 +161,15 @@ target_link_libraries(uav_decision
   ${OpenCV_LIBS}
 )
 
+add_executable(watcher src/watcher.cpp)
+add_dependencies(watcher ${${PROJECT_NAME}_EXPORTED_TARGETS}
+                  ${PROJECT_NAME}_generate_messages_cpp
+                  ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(watcher
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
+)
 #############
 ## Install ##
 #############
